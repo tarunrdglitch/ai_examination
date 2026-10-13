@@ -1,0 +1,26 @@
+{% extends 'student/_layout.html' %}
+{% block title %}Exam History{% endblock %}
+{% block nav_history %}active{% endblock %}
+{% block content %}
+<h2>Exam History</h2>
+<table class="t">
+    <thead>
+        <tr><th>Exam</th><th>Submitted</th><th>Score</th><th>Status</th><th>Violations</th></tr>
+    </thead>
+    <tbody>
+        {% if results %}
+            {% for r in results %}
+            <tr>
+                <td><a href="{{ url_for('student_exam_answers', answer_id=r.answer_id) }}">{{ r.exam_title }}</a></td>
+                <td>{{ r.submitted_at.strftime('%Y-%m-%d %H:%M') if r.submitted_at and r.submitted_at.strftime else (r.submitted_at or '') }}</td>
+                <td>{{ r.score if r.score is not none else '—' }}</td>
+                <td>{{ r.status or '—' }}</td>
+                <td><a href="{{ url_for('view_violations', user_id=session['user_id'], exam_id=r.exam_id) }}" style="color:#4299e1">View</a></td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr><td colspan="5" style="text-align:center">No exams taken yet.</td></tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

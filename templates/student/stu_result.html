@@ -253,7 +253,8 @@
                     {% if results %}
                         {% for result in results %}
                         <tr>
-                            <td><a href="{{ url_for('student_exam_answers', answer_id=result.answer_id) }}">{{ result.exam_title }}</a></td>                            <td>{{ result.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td><a href="{{ url_for('student_exam_answers', answer_id=result.answer_id) }}">{{ result.exam_title }}</a></td>
+                            <td>{{ result.submitted_at.strftime('%Y-%m-%d %H:%M') if result.submitted_at and result.submitted_at.strftime else (result.submitted_at or '') }}</td>
                             <td>{{ result.score }}</td>
                             <td>
                                 {% if result.status == 'passed' %}

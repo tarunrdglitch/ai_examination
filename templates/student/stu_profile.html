@@ -1,0 +1,30 @@
+{% extends 'student/_layout.html' %}
+{% block title %}My Profile{% endblock %}
+{% block nav_profile %}active{% endblock %}
+{% block content %}
+<h2>My Profile</h2>
+<div class="panel">
+    <div class="detail-row"><span class="k">Full name</span><span>{{ student.fullname or '—' }}</span></div>
+    <div class="detail-row"><span class="k">Email</span><span>{{ student.email or '—' }}</span></div>
+    <div class="detail-row"><span class="k">Phone</span><span>{{ student.phone or '—' }}</span></div>
+    <div class="detail-row"><span class="k">Address</span><span>{{ student.address or 'Not provided' }}</span></div>
+    <a class="btn" href="{{ url_for('edit_personal_info') }}">Edit personal info</a>
+</div>
+
+<h2 style="margin-top:28px">Academic information</h2>
+<div class="panel">
+    <div class="detail-row"><span class="k">Course</span><span>{{ student.course or 'Not provided' }}</span></div>
+    <div class="detail-row"><span class="k">Year</span><span>{{ student.year or 'Not provided' }}</span></div>
+    <a class="btn" href="{{ url_for('edit_academic_info') }}">Edit academic info</a>
+</div>
+
+<h2 style="margin-top:28px">Skills</h2>
+<div class="panel">
+    {% if student.skills %}
+        {% for skill in student.skills %}<span class="tag">{{ skill }}</span>{% endfor %}
+    {% else %}
+        <span style="color:#718096">No skills added yet.</span>
+    {% endif %}
+    <div><a class="btn" href="{{ url_for('edit_skills') }}">Edit skills</a></div>
+</div>
+{% endblock %}

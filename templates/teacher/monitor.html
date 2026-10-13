@@ -202,7 +202,7 @@
                         {% for violation in violations %}
                             {% if violation.user_id not in unique_users %}
                                 <tr>
-                                    <td>{{ violation.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>{{ violation.timestamp.strftime('%Y-%m-%d %H:%M:%S') if violation.timestamp and violation.timestamp.strftime else (violation.timestamp or '') }}</td>
                                     <td>{{ violation.student_name }}</td>
                                     <td>{{ violation.email }}</td>
                                     <td>

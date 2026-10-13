@@ -7,12 +7,27 @@ import uuid  # For generating unique session id
 exam_link = str(uuid.uuid4())
 app = Flask(__name__)  # Initialize Flask App
 
+import sqlite_adapter
+
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '12309857',
-    'database': 'proctor'
+    'host': os.environ.get('DB_HOST', ''),
+    'user': os.environ.get('DB_USER', ''),
+    'password': os.environ.get('DB_PASSWORD', ''),
+    'database': os.environ.get('DB_NAME', '')
 }
+
+_orig_mysql_connect = mysql.connector.connect
+
+def smart_db_connect(*args, **kwargs):
+    host = kwargs.get('host') or (args[0].get('host') if args and isinstance(args[0], dict) else None)
+    if not host:
+        return sqlite_adapter.connect(**kwargs)
+    try:
+        return _orig_mysql_connect(*args, **kwargs)
+    except Exception:
+        return sqlite_adapter.connect(**kwargs)
+
+mysql.connector.connect = smart_db_connect
 
 
 

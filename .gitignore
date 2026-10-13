@@ -46,3 +46,5 @@ venv.bak/
 secrets.ini
 config.ini
 credentials.json
+# Dependencies
+node_modules/

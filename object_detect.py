@@ -1,5 +1,8 @@
 import cv2
 import torch
+# PyTorch 2.6+ compatibility for legacy YOLO checkpoints
+_orig_torch_load = torch.load
+torch.load = lambda *args, **kwargs: _orig_torch_load(*args, **{**kwargs, 'weights_only': False} if 'weights_only' not in kwargs else kwargs)
 import numpy as np
 import pyautogui
 import datetime

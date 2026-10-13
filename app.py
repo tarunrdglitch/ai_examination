@@ -35,13 +35,28 @@ app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')  # Use environm
 
 
 
-# MySQL Database Configuration
+# Database Configuration (supports MySQL when configured, with automatic local SQLite adapter)
+import sqlite_adapter
+
 db_config = {
-    'host': '',
-    'user': '',
-    'password': '',
-    'database': ''
+    'host': os.environ.get('DB_HOST', ''),
+    'user': os.environ.get('DB_USER', ''),
+    'password': os.environ.get('DB_PASSWORD', ''),
+    'database': os.environ.get('DB_NAME', '')
 }
+
+_orig_mysql_connect = mysql.connector.connect
+
+def smart_db_connect(*args, **kwargs):
+    host = kwargs.get('host') or (args[0].get('host') if args and isinstance(args[0], dict) else None)
+    if not host:
+        return sqlite_adapter.connect(**kwargs)
+    try:
+        return _orig_mysql_connect(*args, **kwargs)
+    except Exception:
+        return sqlite_adapter.connect(**kwargs)
+
+mysql.connector.connect = smart_db_connect
 
 
 
@@ -258,22 +273,32 @@ def history():
     cursor = None
     profile_image = None
     fullname = None
+    results_data = []
 
     try:
         db = mysql.connector.connect(**db_config)
-        cursor = db.cursor()
+        cursor = db.cursor(dictionary=True)
 
         # Fetch full name from users table
         cursor.execute("SELECT fullname FROM users WHERE user_id = %s", (user_id,))
         user_info = cursor.fetchone()
         if user_info:
-            fullname = user_info[0]
+            fullname = user_info['fullname']
 
         # Fetch profile image
         cursor.execute("SELECT profile_image FROM student_profiles WHERE id = %s", (user_id,))
         result = cursor.fetchone()
-        if result and result[0]:
-            profile_image = base64.b64encode(result[0]).decode('utf-8')  # Convert binary to base64 for HTML
+        if result and result['profile_image']:
+            profile_image = base64.b64encode(result['profile_image']).decode('utf-8')  # Convert binary to base64 for HTML
+
+        # Fetch the student's exam history
+        cursor.execute("""
+            SELECT exam_title, submitted_at, score, status, answer_id, exam_id
+            FROM student_result
+            WHERE user_id = %s
+            ORDER BY submitted_at DESC
+        """, (user_id,))
+        results_data = cursor.fetchall()
 
     except mysql.connector.Error as err:
         return redirect(url_for('stu_login'))
@@ -284,7 +309,7 @@ def history():
         if db and db.is_connected():
             db.close()
 
-    return render_template('student/history.html', profile_image=profile_image, fullname=fullname)
+    return render_template('student/history.html', profile_image=profile_image, fullname=fullname, results=results_data)
 
 
 @app.route('/stu_result')
@@ -558,7 +583,7 @@ def stu_profile():
 
     except mysql.connector.Error as err:
         flash(f"Error: {err}", "error")
-        return redirect(url_for('stu_profile'))
+        return redirect(url_for('studash'))
 
     finally:
         if cursor:
@@ -711,7 +736,7 @@ def edit_skills():
 
     except mysql.connector.Error as err:
         flash(f"Error: {err}", "error")
-        return redirect(url_for('edit_skills'))
+        return redirect(url_for('stu_profile'))
 
     finally:
         if cursor:
@@ -773,7 +798,7 @@ def edit_academic_info():
 
     except Exception as e:
             flash(str(e), "error")
-            return redirect(url_for('edit_academic_info'))
+            return redirect(url_for('stu_profile'))
 
     finally:
         if cursor:
@@ -2716,17 +2741,23 @@ def verify_exam_link():
         debug_info['current_time'] = now.strftime('%Y-%m-%d %H:%M:%S')
         
         # Convert exam_date and exam_time to proper datetime objects
-        # Make sure to handle the MySQL date/time format correctly
-        exam_date_str = exam['exam_date'].strftime('%Y-%m-%d') if isinstance(exam['exam_date'], datetime.date) else str(exam['exam_date'])
-        exam_time_str = exam['exam_time'].strftime('%H:%M:%S') if isinstance(exam['exam_time'], datetime.time) else str(exam['exam_time'])
+        exam_date_str = exam['exam_date'].strftime('%Y-%m-%d') if hasattr(exam['exam_date'], 'strftime') else str(exam['exam_date']).strip()
+        exam_time_str = exam['exam_time'].strftime('%H:%M:%S') if hasattr(exam['exam_time'], 'strftime') else str(exam['exam_time']).strip()
         
+        # If time is in HH:MM format, append :00 seconds
+        if len(exam_time_str.split(':')) == 2:
+            exam_time_str = f"{exam_time_str}:00"
+            
         debug_info['exam_date'] = exam_date_str
         debug_info['exam_time'] = exam_time_str
         
         try:
             # Try to parse the datetime from the database values
             exam_datetime_str = f"{exam_date_str} {exam_time_str}"
-            exam_datetime = datetime.datetime.strptime(exam_datetime_str, '%Y-%m-%d %H:%M:%S')
+            try:
+                exam_datetime = datetime.datetime.strptime(exam_datetime_str, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                exam_datetime = datetime.datetime.strptime(exam_datetime_str, '%Y-%m-%d %H:%M')
             debug_info['exam_datetime'] = exam_datetime.strftime('%Y-%m-%d %H:%M:%S')
             
             # Calculate end time (start time + duration)

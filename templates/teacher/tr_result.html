@@ -309,7 +309,7 @@
                     {% for result in results %}
                     <tr class="result-row">
                         <td><a href="{{ url_for('student_answers', answer_id=result.answer_id) }}">{{ result.fullname }}</a></td>
-                        <td>{{ result.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ result.submitted_at.strftime('%Y-%m-%d %H:%M') if result.submitted_at and result.submitted_at.strftime else (result.submitted_at or '') }}</td>
                         <td>{{ result.exam_title }}</td>
                         <td>{{ result.score }}</td>
                         <td>

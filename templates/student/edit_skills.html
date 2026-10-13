@@ -1,0 +1,30 @@
+{% extends 'student/_layout.html' %}
+{% block title %}Edit Skills{% endblock %}
+{% block nav_profile %}active{% endblock %}
+{% block content %}
+<h2>Edit Skills</h2>
+<form class="panel" method="POST" action="{{ url_for('edit_skills') }}">
+    <div id="skill-list">
+        {% for skill in (skills or ['']) %}
+        <div class="skill-row">
+            <input type="text" name="skills[]" value="{{ skill }}" placeholder="e.g. Python">
+            <button type="button" class="btn secondary small" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    <button type="button" class="btn secondary small" style="margin:6px 0 0" onclick="addSkill()">+ Add skill</button>
+    <div>
+        <button type="submit" class="btn">Save</button>
+        <a class="btn secondary" href="{{ url_for('stu_profile') }}">Cancel</a>
+    </div>
+</form>
+<script>
+    function addSkill() {
+        const row = document.createElement('div');
+        row.className = 'skill-row';
+        row.innerHTML = '<input type="text" name="skills[]" placeholder="e.g. Python">' +
+            '<button type="button" class="btn secondary small" onclick="this.parentElement.remove()">&times;</button>';
+        document.getElementById('skill-list').appendChild(row);
+    }
+</script>
+{% endblock %}
