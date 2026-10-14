@@ -10,9 +10,40 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-# Defaults point to local Spark endpoints (vLLM on port 8000 or Ollama on 11434)
-LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "http://127.0.0.1:11434/v1")
-LLM_MODEL = os.environ.get("LLM_MODEL", "qwen2.5:3b")  # default fallback or gemma/llama/qwen on Spark
+def get_llm_config():
+    """Detects available Ollama or vLLM endpoints across host and container bridges."""
+    custom_url = os.environ.get("LLM_BASE_URL")
+    if custom_url:
+        return custom_url.rstrip('/'), os.environ.get("LLM_MODEL", "nemotron-mini")
+
+    # Candidates in order of likelihood (Docker bridge host -> Spark LAN IP -> localhost)
+    candidates = [
+        "http://172.18.0.1:11434",
+        "http://192.168.10.252:11434",
+        "http://127.0.0.1:11434",
+        "http://127.0.0.1:8000"
+    ]
+    for base in candidates:
+        try:
+            r = requests.get(f"{base}/api/tags", timeout=0.8)
+            if r.status_code == 200:
+                models = [m.get("name", "") for m in r.json().get("models", [])]
+                # Pick preferred model if available
+                preferred = os.environ.get("LLM_MODEL")
+                if not preferred:
+                    for pref in ["nemotron-mini:latest", "nemotron-mini", "llama3.1:8b", "llama3.3:70b", "qwen2.5:3b"]:
+                        if any(pref in m for m in models):
+                            preferred = pref
+                            break
+                    if not preferred and models:
+                        preferred = models[0]
+                return f"{base}/v1", preferred or "nemotron-mini"
+        except Exception:
+            continue
+    return "http://127.0.0.1:11434/v1", os.environ.get("LLM_MODEL", "nemotron-mini")
+
+
+LLM_BASE_URL, LLM_MODEL = get_llm_config()
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "dummy-key")
 
 
