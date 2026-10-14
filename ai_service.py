@@ -95,11 +95,14 @@ def extract_text_from_pdf(file_stream, start_page=None, end_page=None):
         return ""
 
 
-def generate_questions_from_prompt(teacher_prompt, num_questions=5, question_type="both", context_text=""):
+def generate_questions_from_prompt(teacher_prompt, num_questions=5, question_type="both", context_text="", count=None):
     """
     Given a teacher's prompt/topic description and optional eBook context,
     generate structured questions.
     """
+    if count is not None:
+        num_questions = count
+
     sys_prompt = """You are an academic exam generation engine running locally on a private examination server.
 Analyze the user request and generate questions accordingly in strict JSON format.
 The JSON must adhere to the following schema:
