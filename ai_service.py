@@ -155,7 +155,11 @@ Rules:
         clean_res = clean_res.strip()
 
         parsed = json.loads(clean_res)
-        return parsed.get("questions", [])
+        if isinstance(parsed, list):
+            return parsed
+        elif isinstance(parsed, dict):
+            return parsed.get("questions", [])
+        return []
     except Exception as e:
         logger.error(f"Failed to parse LLM generation JSON: {e}. Raw content: {res}")
         return []
