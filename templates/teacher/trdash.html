@@ -305,28 +305,61 @@
             }, 3000);
         }
 
+        // Universal HTTP & HTTPS Clipboard Helper
+        function copyTextToClipboard(text, successMsg) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast(successMsg))
+                    .catch(() => execCopyFallback(text, successMsg));
+            } else {
+                execCopyFallback(text, successMsg);
+            }
+        }
+
+        function execCopyFallback(text, successMsg) {
+            let success = false;
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.top = '0';
+                ta.style.left = '0';
+                ta.style.width = '2em';
+                ta.style.height = '2em';
+                ta.style.padding = '0';
+                ta.style.border = 'none';
+                ta.style.outline = 'none';
+                ta.style.boxShadow = 'none';
+                ta.style.background = 'transparent';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                ta.setSelectionRange(0, 99999);
+                success = document.execCommand('copy');
+                document.body.removeChild(ta);
+            } catch (err) {
+                console.warn('execCommand copy error:', err);
+            }
+
+            if (success) {
+                showToast(successMsg);
+            } else {
+                prompt("Copy this examination URL (Ctrl + C):", text);
+            }
+        }
+
         // Quick Copy Link from card
         function quickCopyLink(examLink, examId) {
             const host = window.location.origin;
             const fullUrl = `${host}/exam_link/${examLink}`;
-            navigator.clipboard.writeText(fullUrl).then(() => {
-                showToast(`Exam link copied! (Code: #${examId})`);
-            }).catch(() => {
-                prompt("Copy this examination URL:", fullUrl);
-            });
+            copyTextToClipboard(fullUrl, `Exam link copied! (Code: #${examId})`);
         }
 
         // Copy from modal input
         function copyFromInput(inputId, successMsg) {
             const input = document.getElementById(inputId);
-            input.select();
-            input.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(input.value).then(() => {
-                showToast(successMsg);
-            }).catch(() => {
-                document.execCommand('copy');
-                showToast(successMsg);
-            });
+            if (!input) return;
+            copyTextToClipboard(input.value, successMsg);
         }
 
         // Share Modal Logic
