@@ -638,6 +638,7 @@
                     this.disabled = false;
                     
                     if (data.valid) {
+                        window.activeExamLink = data.exam_link || examLink;
                         if (data.exam_title) {
                             document.querySelector('#rules-popup h3').textContent = data.exam_title + ' - Rules & Guidelines';
                         }
@@ -701,8 +702,9 @@
 
         document.getElementById("agree-btn").addEventListener("click", function() {
             const examLink = document.getElementById("testLink").value.trim();
-            if (examLink) {
-                window.location.href = `/login?exam_link=${encodeURIComponent(examLink)}`;
+            const targetLink = window.activeExamLink || examLink;
+            if (targetLink) {
+                window.location.href = `/login?exam_link=${encodeURIComponent(targetLink)}`;
             }
         });
 

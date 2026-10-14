@@ -60,6 +60,36 @@
         .dropdown-item:hover { background-color: var(--bg-surface-hover); }
         .dropdown-item.delete { color: var(--error); }
         .dropdown-item.delete:hover { background-color: var(--error-bg); }
+
+        /* Share Modal & Toast */
+        .modal-backdrop {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px);
+            z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal-backdrop.show { display: flex; }
+        .modal-card {
+            background: #ffffff; border-radius: var(--radius-xl); border: 1px solid var(--border);
+            max-width: 520px; width: 92%; padding: 32px; box-shadow: var(--shadow-xl); position: relative;
+            animation: modalSlide 0.2s ease-out;
+        }
+        @keyframes modalSlide { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary); }
+        .modal-close { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+        .modal-close:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+        .share-group { margin-bottom: 18px; }
+        .share-label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+        .share-input-row { display: flex; gap: 8px; }
+        .share-input { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13.5px; background: var(--bg-canvas); color: var(--text-primary); font-family: monospace; outline: none; }
+        .share-input:focus { border-color: var(--accent); background: #ffffff; }
+        .toast-notice {
+            position: fixed; bottom: 28px; right: 28px; background: #0f172a; color: #ffffff;
+            padding: 12px 20px; border-radius: var(--radius); box-shadow: var(--shadow-lg);
+            display: none; align-items: center; gap: 10px; z-index: 2000; font-size: 13.5px; font-weight: 600;
+        }
+        .toast-notice.show { display: flex; animation: toastIn 0.2s ease-out; }
+        @keyframes toastIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 
@@ -128,6 +158,12 @@
                 <div class="card-menu" onclick="event.stopPropagation()">
                     <i class="fas fa-ellipsis-vertical"></i>
                     <div class="dropdown-content" data-exam-id="{{ exam.exam_id }}">
+                        <div class="dropdown-item" onclick="openShareModal('{{ exam.exam_id }}', '{{ exam.exam_title|e }}', '{{ exam.exam_link }}')">
+                            <i class="fas fa-share-nodes text-danger"></i> Share &amp; Access Link
+                        </div>
+                        <a href="/exam_link/{{ exam.exam_link }}" class="dropdown-item" style="text-decoration:none; color:inherit;">
+                            <i class="fas fa-arrow-up-right-from-square"></i> Open Invitation Page
+                        </a>
                         {% if exam.status == 'stopped' %}
                         <div class="dropdown-item" onclick="setExamState('{{ exam.exam_id }}', 'reopen')">
                             <i class="fas fa-play"></i> Re-open Exam
@@ -154,15 +190,89 @@
                     </span>
                     <span class="dl-badge" style="font-size: 11px; text-transform: capitalize;">{{ exam.exam_mode or 'objective' }}</span>
                 </p>
+
+                <!-- Prominent Exam Code & Quick Copy Bar -->
+                <div style="background: var(--bg-canvas); border: 1px dashed var(--border-highlight); border-radius: var(--radius-sm); padding: 8px 12px; margin: 10px 0 12px; display: flex; align-items: center; justify-content: space-between;" onclick="event.stopPropagation()">
+                    <div>
+                        <span style="font-size: 10.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.04em;">Exam Code</span>
+                        <div style="font-size: 15px; font-weight: 800; color: var(--accent); font-family: monospace;">#{{ exam.exam_id }}</div>
+                    </div>
+                    <button type="button" class="dl-btn dl-btn-outline" style="padding: 5px 12px; font-size: 11.5px; border-radius: 6px;" onclick="quickCopyLink('{{ exam.exam_link }}', '{{ exam.exam_id }}')">
+                        <i class="fas fa-copy me-1"></i> Copy Link
+                    </button>
+                </div>
+
                 <p><i class="fas fa-calendar-day me-2 text-muted"></i>Date: <strong>{{ exam.exam_date }}</strong></p>
                 <p><i class="fas fa-clock me-2 text-muted"></i>Time: <strong>{{ exam.exam_time }}</strong></p>
-                <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-                    <span class="dl-badge dl-badge-crimson" style="font-size: 11px;"><i class="fas fa-video"></i> Monitor Live</span>
-                    <span style="font-size: 12px; font-weight: 700; color: var(--accent);">Open Proctoring <i class="fas fa-arrow-right"></i></span>
+                
+                <!-- Action Buttons: Share & Monitor -->
+                <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle); display: flex; gap: 8px;" onclick="event.stopPropagation()">
+                    <button type="button" class="dl-btn dl-btn-outline" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center;" onclick="openShareModal('{{ exam.exam_id }}', '{{ exam.exam_title|e }}', '{{ exam.exam_link }}')">
+                        <i class="fas fa-share-nodes me-1"></i> Share &amp; Code
+                    </button>
+                    <button type="button" class="dl-btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center;" onclick="window.location.href='/teacher/monitor?exam_id={{ exam.exam_id }}'">
+                        <i class="fas fa-video me-1"></i> Monitor Live
+                    </button>
                 </div>
             </div>
             {% endfor %}
         </div>
+    </div>
+
+    <!-- Share Exam Modal Dialog -->
+    <div id="shareModal" class="modal-backdrop" onclick="closeShareModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <span class="dl-badge dl-badge-crimson mb-1"><i class="fas fa-key"></i> Candidate Invitation</span>
+                    <h3 id="modalExamTitle">Share Examination</h3>
+                </div>
+                <button type="button" class="modal-close" onclick="closeShareModal()">&times;</button>
+            </div>
+
+            <!-- Direct Student Link -->
+            <div class="share-group">
+                <label class="share-label"><i class="fas fa-link text-danger me-1"></i> Direct Candidate Exam URL</label>
+                <div class="share-input-row">
+                    <input type="text" id="modalLinkInput" class="share-input" readonly>
+                    <button type="button" class="dl-btn" onclick="copyFromInput('modalLinkInput', 'Direct exam link copied!')">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <span style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: block;">Students can open this link directly to enter the exam room.</span>
+            </div>
+
+            <!-- Student Exam Access Code -->
+            <div class="share-group">
+                <label class="share-label"><i class="fas fa-hashtag text-danger me-1"></i> Student Portal Access Code</label>
+                <div class="share-input-row">
+                    <input type="text" id="modalCodeInput" class="share-input" readonly style="font-weight: 700; color: var(--accent);">
+                    <button type="button" class="dl-btn dl-btn-outline" onclick="copyFromInput('modalCodeInput', 'Exam code copied!')">
+                        <i class="fas fa-copy"></i> Copy Code
+                    </button>
+                </div>
+                <span style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: block;">Students on the home page can type this code into the "Exam Link / Code" box.</span>
+            </div>
+
+            <!-- One-Click Dispatch Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 24px;">
+                <button type="button" class="dl-btn dl-btn-outline" style="flex: 1; justify-content: center; background: #25D366; color: #fff; border-color: #25D366;" onclick="shareViaWhatsAppModal()">
+                    <i class="fab fa-whatsapp me-1"></i> WhatsApp
+                </button>
+                <button type="button" class="dl-btn dl-btn-outline" style="flex: 1; justify-content: center;" onclick="shareViaEmailModal()">
+                    <i class="fas fa-envelope me-1"></i> Email
+                </button>
+                <a id="modalDedicatedPageLink" href="#" class="dl-btn dl-btn-outline" style="flex: 1; justify-content: center; text-decoration: none;" target="_blank">
+                    <i class="fas fa-external-link-alt me-1"></i> View Page
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Toast Notice -->
+    <div id="copyToast" class="toast-notice">
+        <i class="fas fa-circle-check text-success" style="font-size: 16px;"></i>
+        <span id="toastMsg">Link copied to clipboard!</span>
     </div>
 
     <script>
@@ -181,6 +291,77 @@
                 document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
             }
         });
+
+        // Toast Helper
+        let toastTimeout = null;
+        function showToast(msg) {
+            const toast = document.getElementById('copyToast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Quick Copy Link from card
+        function quickCopyLink(examLink, examId) {
+            const host = window.location.origin;
+            const fullUrl = `${host}/exam_link/${examLink}`;
+            navigator.clipboard.writeText(fullUrl).then(() => {
+                showToast(`Exam link copied! (Code: #${examId})`);
+            }).catch(() => {
+                prompt("Copy this examination URL:", fullUrl);
+            });
+        }
+
+        // Copy from modal input
+        function copyFromInput(inputId, successMsg) {
+            const input = document.getElementById(inputId);
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(() => {
+                showToast(successMsg);
+            }).catch(() => {
+                document.execCommand('copy');
+                showToast(successMsg);
+            });
+        }
+
+        // Share Modal Logic
+        let activeExamData = {};
+        function openShareModal(examId, examTitle, examLink) {
+            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+            const host = window.location.origin;
+            const fullUrl = `${host}/exam_link/${examLink}`;
+
+            activeExamData = { id: examId, title: examTitle, link: examLink, url: fullUrl };
+
+            document.getElementById('modalExamTitle').textContent = examTitle;
+            document.getElementById('modalLinkInput').value = fullUrl;
+            document.getElementById('modalCodeInput').value = `#${examId}  (or ${examLink})`;
+            document.getElementById('modalDedicatedPageLink').href = `/exam_link/${examLink}`;
+
+            document.getElementById('shareModal').classList.add('show');
+        }
+
+        function closeShareModal(event) {
+            if (!event || event.target.id === 'shareModal' || event.target.classList.contains('modal-close')) {
+                document.getElementById('shareModal').classList.remove('show');
+            }
+        }
+
+        function shareViaWhatsAppModal() {
+            const text = `DL Proctored Examination Invitation:\nExam: ${activeExamData.title}\nAccess Code: #${activeExamData.id}\nDirect Link: ${activeExamData.url}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function shareViaEmailModal() {
+            const subject = `Invitation to Exam: ${activeExamData.title}`;
+            const body = `You are invited to participate in the proctored examination.\n\nExam: ${activeExamData.title}\nAccess Code: #${activeExamData.id}\nDirect URL: ${activeExamData.url}\n\nPlease ensure your webcam is enabled.`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
 
         function setExamState(examId, action) {
             const msg = action === 'stop'

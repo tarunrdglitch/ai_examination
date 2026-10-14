@@ -2172,6 +2172,17 @@ def teacher_dashboard():
         """, (authority_id,))
         exams = cursor.fetchall()
 
+        # Ensure every exam has an exam_link
+        has_updates = False
+        for ex in exams:
+            if not ex.get('exam_link'):
+                new_link = str(uuid.uuid4())
+                cursor.execute("UPDATE exam_info SET exam_link = %s WHERE exam_id = %s", (new_link, ex['exam_id']))
+                ex['exam_link'] = new_link
+                has_updates = True
+        if has_updates:
+            db.commit()
+
     except mysql.connector.Error as err:
         flash(f"Error: {err}", "error")
         return redirect(url_for('teacher_login'))
@@ -2986,25 +2997,33 @@ def teacher_monitor():
 # To active the exam link when time and date reached
 @app.route('/verify_exam_link', methods=['POST'])
 def verify_exam_link():
-    exam_link = request.json.get('exam_link')
-    if not exam_link:
-        return jsonify({'valid': False, 'message': 'No exam link provided'})
+    raw_input = (request.json.get('exam_link') or '').strip()
+    if not raw_input:
+        return jsonify({'valid': False, 'message': 'No exam link or code provided'})
+    
+    # Normalize: strip URLs, query params, hashtags
+    normalized = raw_input
+    if 'exam_link=' in normalized:
+        normalized = normalized.split('exam_link=')[-1].split('&')[0].strip()
+    elif '/' in normalized:
+        normalized = normalized.rstrip('/').split('/')[-1].strip()
+    clean_code = normalized.lstrip('#').strip()
     
     try:
         db = mysql.connector.connect(**db_config)
         cursor = db.cursor(dictionary=True)
         
-        # Fetch exam details
+        # Fetch exam details matching link or numeric id
         cursor.execute("""
-            SELECT exam_id, exam_title, exam_date, exam_time, exam_duration, status 
+            SELECT exam_id, exam_title, exam_date, exam_time, exam_duration, status, exam_link 
             FROM exam_info 
-            WHERE exam_link = %s
-        """, (exam_link,))
+            WHERE exam_link = %s OR exam_link = %s OR CAST(exam_id AS CHAR) = %s
+        """, (raw_input, normalized, clean_code))
         
         exam = cursor.fetchone()
         
         if not exam:
-            return jsonify({'valid': False, 'message': 'Invalid exam link'})
+            return jsonify({'valid': False, 'message': 'Invalid exam link or code'})
         
         # Debug info
         debug_info = {}
@@ -3082,6 +3101,8 @@ def verify_exam_link():
                 return jsonify({
                     'valid': True,
                     'exam_title': exam['exam_title'],
+                    'exam_link': exam['exam_link'],
+                    'exam_id': exam['exam_id'],
                     'debug': debug_info
                 })
                 
@@ -3109,30 +3130,39 @@ def verify_exam_link():
 # Add this route for testing purposes - to be removed in production
 @app.route('/bypass_exam_link', methods=['POST'])
 def bypass_exam_link():
-    exam_link = request.json.get('exam_link')
-    if not exam_link:
-        return jsonify({'valid': False, 'message': 'No exam link provided'})
+    raw_input = (request.json.get('exam_link') or '').strip()
+    if not raw_input:
+        return jsonify({'valid': False, 'message': 'No exam link or code provided'})
+    
+    normalized = raw_input
+    if 'exam_link=' in normalized:
+        normalized = normalized.split('exam_link=')[-1].split('&')[0].strip()
+    elif '/' in normalized:
+        normalized = normalized.rstrip('/').split('/')[-1].strip()
+    clean_code = normalized.lstrip('#').strip()
     
     try:
         db = mysql.connector.connect(**db_config)
         cursor = db.cursor(dictionary=True)
         
-        # Fetch exam details
+        # Fetch exam details matching link or numeric id
         cursor.execute("""
-            SELECT exam_id, exam_title
+            SELECT exam_id, exam_title, exam_link
             FROM exam_info 
-            WHERE exam_link = %s
-        """, (exam_link,))
+            WHERE exam_link = %s OR exam_link = %s OR CAST(exam_id AS CHAR) = %s
+        """, (raw_input, normalized, clean_code))
         
         exam = cursor.fetchone()
         
         if not exam:
-            return jsonify({'valid': False, 'message': 'Invalid exam link'})
+            return jsonify({'valid': False, 'message': 'Invalid exam link or code'})
         
         # Bypass all time checks - always return valid
         return jsonify({
             'valid': True,
             'exam_title': exam['exam_title'],
+            'exam_link': exam['exam_link'],
+            'exam_id': exam['exam_id'],
             'message': 'BYPASS MODE: Time restrictions bypassed for testing'
         })
         
