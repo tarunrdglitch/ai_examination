@@ -2285,6 +2285,43 @@ def teacher_createxm():
     return render_template('teacher/tr_createxm.html', fullname=fullname, profile_image=profile_image)
 
 
+import ai_service
+
+@app.route('/api/ai/generate_questions', methods=['POST'])
+def api_generate_questions():
+    """Generates MCQs / Subjective questions from prompt or chapter requirements using local LLM."""
+    if 'authority_id' not in session:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+    
+    data = request.get_json() or {}
+    prompt = (data.get('prompt') or '').strip()
+    num = int(data.get('count') or 5)
+    qtype = data.get('type') or 'both'
+
+    if not prompt:
+        return jsonify({'success': False, 'error': 'Prompt description is required'}), 400
+
+    questions = ai_service.generate_questions_from_prompt(prompt, num_questions=num, question_type=qtype)
+    return jsonify({'success': True, 'questions': questions})
+
+
+@app.route('/api/ai/grade_subjective', methods=['POST'])
+def api_grade_subjective():
+    """Uses local reasoning LLM to grade a subjective answer against rubric and model answer."""
+    if 'authority_id' not in session:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    data = request.get_json() or {}
+    q_text = data.get('question_text') or ''
+    model_ans = data.get('model_answer') or ''
+    rubric = data.get('rubric') or ''
+    max_marks = float(data.get('marks') or 5.0)
+    student_ans = data.get('student_answer') or ''
+
+    evaluation = ai_service.grade_subjective_answer(q_text, model_ans, rubric, max_marks, student_ans)
+    return jsonify({'success': True, 'evaluation': evaluation})
+
+
 @app.route('/instruction/<int:exam_id>', methods=['GET', 'POST'])
 def teacher_instruction(exam_id):
     if request.method == 'POST':
@@ -2658,7 +2695,8 @@ def student_answers():
 
         # Fetch the student's answers for this submission
         cursor.execute("""
-            SELECT eq.question_id, eq.question_text, eq.options, sad.answer, eq.marks, eq.question_image 
+            SELECT eq.question_id, eq.question_text, eq.options, sad.answer, eq.marks, eq.question_image,
+                   eq.exam_type, eq.model_answer, eq.rubric, sad.marks_awarded, sad.ai_marks, sad.ai_feedback
             FROM student_answers sad
             JOIN exam_questions eq ON sad.question_id = eq.question_id
             WHERE sad.answer_id = %s

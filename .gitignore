@@ -49,3 +49,4 @@ credentials.json
 # Dependencies
 node_modules/
 recordings/
+data/

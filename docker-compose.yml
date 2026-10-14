@@ -1,0 +1,16 @@
+services:
+  exam-app:
+    build: .
+    image: dl-exam-app:latest
+    container_name: dl-exam-app
+    restart: unless-stopped
+    ports:
+      - "8088:5000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-me-please}
+      WEB_WORKERS: ${WEB_WORKERS:-2}
+      WEB_THREADS: ${WEB_THREADS:-16}
+    volumes:
+      - ./data/database:/app/database
+      - ./data/recordings:/app/recordings
+      - ./data/violation_screenshots:/app/violation_screenshots

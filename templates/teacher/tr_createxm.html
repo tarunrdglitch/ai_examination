@@ -139,6 +139,41 @@
             <div class="mode-pill" id="mode-pill"><i class="fas fa-layer-group"></i> Exam type: <strong id="mode-label">Add questions below</strong></div>
         </div>
 
+        <!-- AI Assistant Prompt Generation Box -->
+        <div class="form-section ai-prompt-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                <h3 style="margin:0; border:none; padding:0; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-wand-magic-sparkles text-danger"></i> Local AI Question Generator (DGX Spark)
+                </h3>
+                <span class="role-badge" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;">
+                    <i class="fas fa-microchip"></i> LAN Mode (No Internet Needed)
+                </span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0;">
+                Describe the chapter, syllabus topic, or page range (e.g., <em>"Generate 5 MCQs and 2 subjective questions on Chapter 4: Neural Networks, medium difficulty"</em>). Our local Spark AI will automatically generate and populate questions below for you to edit.
+            </p>
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+                <textarea id="ai-user-prompt" rows="2" style="margin-bottom:0;" placeholder="Tell AI: 'Create 10 objective questions on Binary Trees from page 45 to 60' or paste chapter summary..."></textarea>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <label style="margin:0; font-size:0.82rem;">Questions: 
+                        <input type="number" id="ai-count" value="5" min="1" max="20" style="width:65px; display:inline-block; margin:0; padding:6px 8px;">
+                    </label>
+                    <label style="margin:0; font-size:0.82rem;">Format:
+                        <select id="ai-format" style="width:130px; display:inline-block; margin:0; padding:6px 8px;">
+                            <option value="both">Both (MCQ + Subj)</option>
+                            <option value="objective">MCQ Only</option>
+                            <option value="subjective">Subjective Only</option>
+                        </select>
+                    </label>
+                </div>
+                <button type="button" id="btn-ai-generate" class="dl-btn" style="padding:9px 18px; font-size:0.88rem;">
+                    <i class="fas fa-robot"></i> <span id="ai-btn-text">Generate Questions with AI</span>
+                </button>
+            </div>
+        </div>
+
         <div id="question-list"></div>
 
         <div class="form-section add-bar">
@@ -304,6 +339,72 @@
             negative: parseFloat(document.getElementById('neg-marking').value) || 0,
             record: document.getElementById('record-toggle').checked
         });
+    });
+
+    // AI Generation integration
+    const btnAi = document.getElementById('btn-ai-generate');
+    const aiBtnText = document.getElementById('ai-btn-text');
+    const promptInput = document.getElementById('ai-user-prompt');
+
+    btnAi.addEventListener('click', async function() {
+        const prompt = promptInput.value.trim();
+        if (!prompt) {
+            alert('Please enter a description, chapter title, or syllabus request for the AI.');
+            promptInput.focus();
+            return;
+        }
+
+        const count = parseInt(document.getElementById('ai-count').value) || 5;
+        const type = document.getElementById('ai-format').value;
+
+        btnAi.disabled = true;
+        aiBtnText.textContent = 'Generating on Spark...';
+
+        try {
+            const resp = await fetch('/api/ai/generate_questions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, count, type })
+            });
+            const data = await resp.json();
+            if (!data.success || !data.questions || !data.questions.length) {
+                alert('AI could not generate questions or the Spark LLM service is offline. Please check your model service.');
+                return;
+            }
+
+            // Populate returned questions
+            data.questions.forEach(q => {
+                const isObj = q.type === 'objective';
+                addQuestion(isObj ? 'objective' : 'subjective');
+                const lastCard = list.lastElementChild;
+                if (!lastCard) return;
+
+                lastCard.querySelector('.qtext').value = q.text || '';
+                lastCard.querySelector('.qmarks').value = q.marks || (isObj ? 1 : 5);
+
+                if (isObj && q.options && q.options.length) {
+                    const optBox = lastCard.querySelector('.opts');
+                    optBox.innerHTML = '';
+                    const correctIdx = q.correct !== undefined ? q.correct : 0;
+                    q.options.forEach((optText, oIdx) => {
+                        addOption(lastCard, optText, oIdx === correctIdx);
+                    });
+                } else if (!isObj) {
+                    if (q.model_answer) lastCard.querySelector('.qmodel').value = q.model_answer;
+                    if (q.rubric) lastCard.querySelector('.qrubric').value = q.rubric;
+                }
+            });
+
+            refresh();
+            promptInput.value = '';
+            alert(`Successfully generated and added ${data.questions.length} questions from your prompt!`);
+        } catch (err) {
+            console.error('AI generation error:', err);
+            alert('Failed to connect to local AI service on Spark.');
+        } finally {
+            btnAi.disabled = false;
+            aiBtnText.textContent = 'Generate Questions with AI';
+        }
     });
 
     document.querySelectorAll('.menu-item').forEach(item => {

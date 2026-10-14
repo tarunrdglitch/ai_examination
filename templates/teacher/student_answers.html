@@ -320,8 +320,40 @@
           <i class="fas fa-check-circle"></i>
           <span><strong>Submitted Candidate Answer:</strong> {{ answer.answer }}</span>
         </div>
+
+        {% if answer.exam_type == 'subjective' %}
+        <div class="ai-eval-card" style="margin-top:14px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:var(--radius); padding:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-weight:700; font-size:0.85rem; color:#0369a1; display:flex; align-items:center; gap:6px;">
+              <i class="fas fa-brain"></i> Spark AI Subjective Grader
+            </span>
+            <button type="button" class="dl-btn dl-btn-secondary" style="padding:4px 10px; font-size:0.75rem;" 
+              onclick="evaluateWithAI(this, {{ loop.index0 }})"
+              data-qtext="{{ answer.question_text|e }}"
+              data-modelans="{{ (answer.model_answer or '')|e }}"
+              data-rubric="{{ (answer.rubric or '')|e }}"
+              data-marks="{{ answer.marks }}"
+              data-studentans="{{ answer.answer|e }}">
+              <i class="fas fa-wand-magic-sparkles"></i> AI Grade This Answer
+            </button>
+          </div>
+          {% if answer.model_answer %}
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:4px;">
+            <strong>Expected Concept:</strong> {{ answer.model_answer }}
+          </div>
+          {% endif %}
+          <div class="ai-eval-result" style="display:none; font-size:0.85rem; padding-top:8px; border-top:1px dashed #cbd5e1; margin-top:8px;">
+            <div style="color:#0f172a;"><strong>AI Suggested Score:</strong> <span class="ai-suggested-mark" style="color:var(--accent); font-weight:700;">-</span> / {{ answer.marks }}</div>
+            <div style="color:var(--text-secondary); margin-top:4px;"><strong>Feedback &amp; Breakdown:</strong> <span class="ai-suggested-feedback">-</span></div>
+            <button type="button" class="dl-btn" style="padding:4px 10px; font-size:0.75rem; margin-top:8px; background:#0284c7;" onclick="applyAiScore(this)">
+              <i class="fas fa-check"></i> Accept AI Marks for Overall Score
+            </button>
+          </div>
+        </div>
+        {% endif %}
       </div>
       {% endfor %}
+
 
       <div class="exam-status-section">
         <h3>Final Assessment Decision</h3>
@@ -349,5 +381,61 @@
       </div>
     </form>
   </div>
+
+  <script>
+    async function evaluateWithAI(btn, idx) {
+      const card = btn.closest('.ai-eval-card');
+      const resBox = card.querySelector('.ai-eval-result');
+      const markSpan = card.querySelector('.ai-suggested-mark');
+      const feedSpan = card.querySelector('.ai-suggested-feedback');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spark AI Evaluating...';
+
+      try {
+        const resp = await fetch('/api/ai/grade_subjective', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question_text: btn.dataset.qtext,
+            model_answer: btn.dataset.modelans,
+            rubric: btn.dataset.rubric,
+            marks: btn.dataset.marks,
+            student_answer: btn.dataset.studentans
+          })
+        });
+
+        const data = await resp.json();
+        if (data.success && data.evaluation) {
+          const ev = data.evaluation;
+          markSpan.textContent = ev.marks;
+          feedSpan.textContent = ev.feedback || 'Evaluated against rubric.';
+          resBox.style.display = 'block';
+          btn.dataset.aiScore = ev.marks;
+        } else {
+          alert('Could not grade: Spark LLM returned an error or is offline.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Failed to connect to local Spark LLM grading service.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> AI Re-Grade';
+      }
+    }
+
+    function applyAiScore(btn) {
+      const card = btn.closest('.ai-eval-card');
+      const markSpan = card.querySelector('.ai-suggested-mark');
+      const score = parseFloat(markSpan.textContent);
+      if (!isNaN(score)) {
+        const overallInput = document.getElementById('overall-mark');
+        const current = parseFloat(overallInput.value) || 0;
+        overallInput.value = Math.round(current + score);
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-check"></i> Applied to Score';
+      }
+    }
+  </script>
 </body>
 </html>
