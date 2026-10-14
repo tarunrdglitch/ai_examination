@@ -4,7 +4,10 @@ import torch
 _orig_torch_load = torch.load
 torch.load = lambda *args, **kwargs: _orig_torch_load(*args, **{**kwargs, 'weights_only': False} if 'weights_only' not in kwargs else kwargs)
 import numpy as np
-import pyautogui
+try:
+    import pyautogui
+except (ImportError, Exception):
+    pyautogui = None
 import datetime
 import json
 import os
@@ -80,6 +83,8 @@ class ExamProctor:
 
     def capture_screen(self):
         """Capture screenshot when violation is detected."""
+        if not pyautogui:
+            return
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = os.path.join(self.screenshot_dir, f"violation_{timestamp}.png")
         pyautogui.screenshot().save(filename)

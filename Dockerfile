@@ -14,12 +14,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --upgrade pip wheel setuptools \
+RUN pip install --upgrade pip wheel "setuptools<70.0.0" \
     && pip install -r requirements.txt \
     && pip install gunicorn==21.2.0
 
 COPY . .
-RUN mkdir -p database recordings violation_screenshots && chmod +x docker-entrypoint.sh
+RUN pip install /app/face_recognition_models-master \
+    && mkdir -p database recordings violation_screenshots && chmod +x docker-entrypoint.sh
 
 EXPOSE 5000
 ENTRYPOINT ["./docker-entrypoint.sh"]
