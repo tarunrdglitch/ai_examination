@@ -999,7 +999,7 @@ def questions(exam_id):
         
         # Fetch exam details
         cursor.execute("""
-            SELECT exam_title, exam_duration, status 
+            SELECT exam_title, exam_duration, status, record_enabled 
             FROM exam_info 
             WHERE exam_id = %s
         """, (exam_id,))
@@ -1013,9 +1013,9 @@ def questions(exam_id):
             flash("This exam has been closed by the examiner.", "warning")
             return redirect(url_for('studash'))
         
-        # Fetch exam questions including exam_type
+        # Fetch exam questions including exam_type, testcases, and language
         cursor.execute("""
-            SELECT question_id, question_text, question_image, marks, options, exam_type
+            SELECT question_id, question_text, question_image, marks, options, exam_type, testcases, language, model_answer
             FROM exam_questions 
             WHERE exam_id = %s
         """, (exam_id,))
@@ -1031,6 +1031,7 @@ def questions(exam_id):
             'student/questions.html',
             exam_title=exam_info['exam_title'],
             exam_duration=exam_info['exam_duration'] or 60,
+            record_enabled=bool(exam_info.get('record_enabled')),
             questions=questions,
             exam_id=exam_id
         )
@@ -1377,10 +1378,70 @@ def process_frame():
         violations.extend(object_violations)
         violation_details['objects'] = object_details.get('objects', [])
     
-    pass
+    # Temporal anomaly tracking store:
+    # key: (exam_id, user_id)
+    # value: { violation_key: {'streak': int, 'first_seen': float, 'last_logged': float} }
+    global anomaly_temporal_tracker
+    if 'anomaly_temporal_tracker' not in globals():
+        anomaly_temporal_tracker = {}
+
+    import time
+    now = time.time()
+    session_key = (str(exam_id), str(user_id))
+    if session_key not in anomaly_temporal_tracker:
+        anomaly_temporal_tracker[session_key] = {}
     
-    # If violations detected, save the frame
-    if violations:
+    tracker = anomaly_temporal_tracker[session_key]
+    confirmed_violations = []
+
+    # Map raw strings to category keys for temporal debouncing
+    current_categories = []
+    for v in violations:
+        v_low = v.lower()
+        if "no face" in v_low:
+            cat = "no_face"
+        elif "multiple face" in v_low:
+            cat = "multiple_faces"
+        elif "looking away" in v_low:
+            cat = "looking_away"
+        elif any(k in v_low for k in ["prohibited", "phone", "cell", "laptop", "book"]):
+            cat = "prohibited_object"
+        elif "unauthorized" in v_low:
+            cat = "unauthorized_person"
+        else:
+            cat = "anomaly"
+        current_categories.append((cat, v))
+
+    seen_cats = set()
+    for cat, original_text in current_categories:
+        seen_cats.add(cat)
+        if cat not in tracker:
+            tracker[cat] = {'streak': 1, 'first_seen': now, 'last_logged': 0.0}
+        else:
+            tracker[cat]['streak'] += 1
+
+        state = tracker[cat]
+        duration = now - state['first_seen']
+        time_since_last_logged = now - state['last_logged']
+
+        # Temporal thresholds:
+        # Require sustained anomaly (>= 3 consecutive frames or >= 2.0s) to avoid single-frame false positives
+        min_streak = 2 if cat in ("unauthorized_person", "prohibited_object") else 3
+        min_duration = 1.5 if cat in ("unauthorized_person", "prohibited_object") else 2.2
+        cooldown = 10.0  # seconds between repeat loggings of the same anomaly
+
+        if state['streak'] >= min_streak and duration >= min_duration:
+            if time_since_last_logged >= cooldown:
+                confirmed_violations.append(original_text)
+                state['last_logged'] = now
+
+    # Reset categories that cleared
+    for cat in list(tracker.keys()):
+        if cat not in seen_cats:
+            del tracker[cat]
+
+    # Only process and save confirmed temporal violations
+    if confirmed_violations:
         try:
             # Encode frame as JPEG
             encode_result = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
@@ -1396,7 +1457,7 @@ def process_frame():
             violation_id = log_violation_to_db(
                 user_id=user_id,
                 exam_id=exam_id,
-                violation_type=', '.join(violations),
+                violation_type=', '.join(confirmed_violations),
                 face_count=violation_details.get('face_count', 0),
                 violation_image=violation_image_data,
                 timestamp=datetime.datetime.now()
@@ -1405,7 +1466,7 @@ def process_frame():
             if violation_id:
                 return jsonify({
                     'success': True,
-                    'violations': violations,
+                    'violations': confirmed_violations,
                     'violation_id': violation_id,
                     'details': violation_details
                 })
@@ -1414,7 +1475,8 @@ def process_frame():
             print(f"Image processing error: {e}")
             return jsonify({'error': 'Image processing failed'}), 500
     
-    return jsonify({'success': False, 'violations': violations})
+    return jsonify({'success': False, 'violations': []})
+
 
 
 
@@ -1596,12 +1658,46 @@ def log_violation_to_db(user_id, exam_id, violation_type, face_count, violation_
             conn.close()
 
 
-# Upload stream endpoint (keep for backward compatibility)
-@app.route('/upload_stream', methods=['POST'])
-def upload_stream():
-    # This is now replaced by the more robust process_frame endpoint
-    # But kept for backward compatibility
-    return jsonify({'success': True})
+@app.route('/upload_recording_chunk', methods=['POST'])
+def upload_recording_chunk():
+    """Receives binary chunks of student video/audio/screen recording during an exam."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+    
+    exam_id = request.form.get('exam_id')
+    chunk_index = request.form.get('chunk_index', 0)
+    rec_type = request.form.get('type', 'webcam') # 'webcam' or 'screen'
+    chunk_file = request.files.get('video_chunk')
+
+    if not exam_id or not chunk_file:
+        return jsonify({'success': False, 'error': 'Missing exam_id or video_chunk'}), 400
+
+    exam_dir = os.path.join(exam_engine.RECORDINGS_DIR, str(exam_id))
+    os.makedirs(exam_dir, exist_ok=True)
+    
+    # Append or write chunk
+    rec_path = os.path.join(exam_dir, f"{user_id}_{rec_type}.webm")
+    try:
+        with open(rec_path, "ab") as f:
+            f.write(chunk_file.read())
+        return jsonify({'success': True, 'file': rec_path})
+    except Exception as e:
+        app.logger.error(f"Error saving recording chunk: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/exam_recording/<int:exam_id>/<int:user_id>/<rec_type>')
+def get_exam_recording(exam_id, user_id, rec_type='webcam'):
+    """Serves the continuous exam session video for teacher audit."""
+    if 'authority_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    rec_path = os.path.join(exam_engine.RECORDINGS_DIR, str(exam_id), f"{user_id}_{rec_type}.webm")
+    if os.path.isfile(rec_path):
+        return send_file(rec_path, mimetype='video/webm')
+    return jsonify({'error': 'Recording not found'}), 404
+
 
 
 @app.route('/violation_image/<int:violation_id>')
@@ -2236,7 +2332,8 @@ def teacher_createxm():
             )
 
             for i, q in enumerate(builder_questions):
-                qtype = 'objective' if q.get('type') == 'objective' else 'subjective'
+                raw_type = q.get('type')
+                qtype = 'objective' if raw_type == 'objective' else ('coding' if raw_type == 'coding' else 'subjective')
                 text = (q.get('text') or '').strip()
                 if not text:
                     continue
@@ -2263,10 +2360,11 @@ def teacher_createxm():
                 cursor.execute(
                     """INSERT INTO exam_questions
                        (authority_id, exam_id, exam_title, exam_type, question_text, question_image,
-                        marks, options, correct_answer, model_answer, rubric)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        marks, options, correct_answer, model_answer, rubric, testcases, language)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (authority_id, exam_id, exam_title, qtype, text, image_data, mark,
-                     options_text, correct_answer, q.get('model_answer'), q.get('rubric'))
+                     options_text, correct_answer, q.get('model_answer'), q.get('rubric'),
+                     q.get('testcases'), q.get('language'))
                 )
             
             db.commit()
@@ -2289,19 +2387,38 @@ import ai_service
 
 @app.route('/api/ai/generate_questions', methods=['POST'])
 def api_generate_questions():
-    """Generates MCQs / Subjective questions from prompt or chapter requirements using local LLM."""
+    """Generates MCQs / Subjective questions from prompt or eBook PDF chapter using local LLM."""
     if 'authority_id' not in session:
         return jsonify({'success': False, 'error': 'Unauthorized'}), 401
     
-    data = request.get_json() or {}
-    prompt = (data.get('prompt') or '').strip()
-    num = int(data.get('count') or 5)
-    qtype = data.get('type') or 'both'
+    # Handle either JSON or multipart/form-data (for PDF upload)
+    if request.is_json:
+        data = request.get_json() or {}
+        prompt = (data.get('prompt') or '').strip()
+        num = int(data.get('count') or 5)
+        qtype = data.get('type') or 'both'
+        context_text = data.get('context_text') or ''
+    else:
+        prompt = (request.form.get('prompt') or '').strip()
+        num = int(request.form.get('count') or 5)
+        qtype = request.form.get('type') or 'both'
+        context_text = ''
+        
+        pdf_file = request.files.get('ebook')
+        if pdf_file and pdf_file.filename:
+            start_p = int(request.form.get('start_page')) if request.form.get('start_page') else None
+            end_p = int(request.form.get('end_page')) if request.form.get('end_page') else None
+            context_text = ai_service.extract_text_from_pdf(pdf_file.stream, start_p, end_p)
 
-    if not prompt:
-        return jsonify({'success': False, 'error': 'Prompt description is required'}), 400
+    if not prompt and not context_text:
+        return jsonify({'success': False, 'error': 'Prompt description or eBook upload is required'}), 400
 
-    questions = ai_service.generate_questions_from_prompt(prompt, num_questions=num, question_type=qtype)
+    questions = ai_service.generate_questions_from_prompt(
+        prompt or "Generate questions based on the provided reference material.", 
+        num_questions=num, 
+        question_type=qtype, 
+        context_text=context_text
+    )
     return jsonify({'success': True, 'questions': questions})
 
 
@@ -2320,6 +2437,39 @@ def api_grade_subjective():
 
     evaluation = ai_service.grade_subjective_answer(q_text, model_ans, rubric, max_marks, student_ans)
     return jsonify({'success': True, 'evaluation': evaluation})
+
+
+import code_runner
+
+@app.route('/api/code/run', methods=['POST'])
+def api_run_code():
+    """Real-time compilation and execution of student code with custom inputs."""
+    if 'user_id' not in session and 'authority_id' not in session:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    data = request.get_json() or {}
+    lang = data.get('language', 'python')
+    code = data.get('code', '')
+    input_data = data.get('input', '')
+
+    result = code_runner.execute_code(lang, code, input_data)
+    return jsonify(result)
+
+
+@app.route('/api/code/test', methods=['POST'])
+def api_test_code():
+    """Runs candidate code against test cases (sample or hidden) with pass/fail evaluation."""
+    if 'user_id' not in session and 'authority_id' not in session:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    data = request.get_json() or {}
+    lang = data.get('language', 'python')
+    code = data.get('code', '')
+    test_cases = data.get('test_cases', [])
+
+    result = code_runner.run_test_cases(lang, code, test_cases)
+    return jsonify(result)
+
 
 
 @app.route('/instruction/<int:exam_id>', methods=['GET', 'POST'])
@@ -2682,7 +2832,7 @@ def student_answers():
 
         # Verify the submission belongs to the teacher's exam
         cursor.execute("""
-            SELECT sa.fullname, sa.exam_title, ei.authority_id 
+            SELECT sa.fullname, sa.exam_title, sa.user_id, sa.exam_id, ei.authority_id 
             FROM student_result sa
             JOIN exam_info ei ON sa.exam_id = ei.exam_id
             WHERE sa.answer_id = %s
@@ -2714,8 +2864,10 @@ def student_answers():
             'teacher/student_answers.html',
             fullname=submission_info['fullname'],
             exam_title=submission_info['exam_title'],
+            user_id=submission_info['user_id'],
+            exam_id=submission_info['exam_id'],
             answers=answers,
-            answer_id=answer_id  # Pass answer_id to the template
+            answer_id=answer_id
         )
 
     except mysql.connector.Error as err:

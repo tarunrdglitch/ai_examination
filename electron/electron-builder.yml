@@ -1,0 +1,26 @@
+appId: com.datalogics.examlockdown
+productName: DL Proctored Exam Browser
+copyright: Copyright © 2026 DataLogics
+
+directories:
+  output: dist
+
+files:
+  - main.js
+  - preload.js
+  - package.json
+
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+    - target: nsis
+      arch:
+        - x64
+  requestedExecutionLevel: requireAdministrator
+
+nsis:
+  oneClick: true
+  perMachine: true
+  allowToChangeInstallationDirectory: false

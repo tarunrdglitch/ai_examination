@@ -287,6 +287,23 @@
         </a>
         <h1>Evaluation: {{ fullname }}</h1>
         <p class="eval-subtitle"><i class="fas fa-file-signature"></i> {{ exam_title }}</p>
+
+        <!-- Exam Session Video Audit Player -->
+        <div style="margin-top:16px; padding:16px; background:#f1f5f9; border-radius:var(--radius); border:1px solid #cbd5e1;">
+          <h4 style="margin:0 0 10px; font-size:0.95rem; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-video text-danger"></i> Complete Candidate Session Video Audit
+          </h4>
+          <video controls preload="metadata" style="width:100%; max-height:340px; border-radius:8px; background:#000;"
+                 src="/exam_recording/{{ exam_id }}/{{ user_id }}/webcam">
+            Your browser does not support WebM session playback.
+          </video>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text-secondary); display:flex; justify-content:space-between;">
+            <span><i class="fas fa-shield-halved"></i> Continuous tamper-resistant webcam &amp; audio recording stream</span>
+            <a href="/violations/{{ user_id }}/{{ exam_id }}" target="_blank" style="color:var(--accent); font-weight:600;">
+              <i class="fas fa-triangle-exclamation"></i> View Violation Incidents &amp; Snapshots
+            </a>
+          </div>
+        </div>
       </div>
 
       {% for answer in answers %}

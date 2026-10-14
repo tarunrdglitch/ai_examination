@@ -1,0 +1,17 @@
+{
+  "name": "dl-exam-lockdown-browser",
+  "version": "1.0.0",
+  "description": "Enterprise High-Security Locked Desktop Browser for AI Examination Platform",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist:win": "electron-builder --win portable nsis"
+  },
+  "author": "DataLogics AI Solutions",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1"
+  }
+}

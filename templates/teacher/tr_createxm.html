@@ -153,7 +153,21 @@
                 Describe the chapter, syllabus topic, or page range (e.g., <em>"Generate 5 MCQs and 2 subjective questions on Chapter 4: Neural Networks, medium difficulty"</em>). Our local Spark AI will automatically generate and populate questions below for you to edit.
             </p>
             <div style="display:flex; gap:10px; margin-bottom:12px;">
-                <textarea id="ai-user-prompt" rows="2" style="margin-bottom:0;" placeholder="Tell AI: 'Create 10 objective questions on Binary Trees from page 45 to 60' or paste chapter summary..."></textarea>
+                <textarea id="ai-user-prompt" rows="2" style="margin-bottom:0;" placeholder="Tell AI: 'Create 10 objective questions on Binary Trees' or specify chapter/topic..."></textarea>
+            </div>
+            <!-- Optional eBook / PDF Attachment & Slicing -->
+            <div style="background:var(--bg-canvas); border:1px dashed var(--border); border-radius:var(--radius); padding:10px 14px; margin-bottom:12px; display:flex; flex-wrap:wrap; gap:14px; align-items:center;">
+                <label style="margin:0; font-size:0.82rem; font-weight:700; color:var(--accent); cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <i class="fas fa-book-open"></i> Attach Chapter / eBook PDF:
+                    <input type="file" id="ai-ebook" accept="application/pdf" style="display:none;" onchange="document.getElementById('ai-ebook-name').textContent = this.files[0] ? this.files[0].name : '';">
+                </label>
+                <span id="ai-ebook-name" style="font-size:0.8rem; color:var(--text-secondary); font-style:italic;">No file selected</span>
+                <div style="display:inline-flex; gap:8px; align-items:center; margin-left:auto;">
+                    <span style="font-size:0.8rem; color:var(--text-secondary);">Pages:</span>
+                    <input type="number" id="ai-start-page" placeholder="From" min="1" style="width:65px; margin:0; padding:4px 6px; font-size:0.82rem;">
+                    <span style="font-size:0.8rem;">to</span>
+                    <input type="number" id="ai-end-page" placeholder="To" min="1" style="width:65px; margin:0; padding:4px 6px; font-size:0.82rem;">
+                </div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <div style="display:flex; gap:12px; align-items:center;">
@@ -180,6 +194,7 @@
             <span class="add-bar-title">Add a question</span>
             <button type="button" class="dl-btn dl-btn-secondary" data-add="objective"><i class="fas fa-circle-dot"></i> Objective (MCQ)</button>
             <button type="button" class="dl-btn dl-btn-secondary" data-add="subjective"><i class="fas fa-pen-nib"></i> Subjective</button>
+            <button type="button" class="dl-btn dl-btn-secondary" data-add="coding"><i class="fas fa-code"></i> Coding Challenge</button>
         </div>
 
         <div class="form-footer">
@@ -269,15 +284,31 @@
         card.dataset.type = type;
         card.dataset.uid = uid;
         const isObj = type === 'objective';
+        const isCoding = type === 'coding';
         card.innerHTML = `
             <div class="qhead">
-                <span class="qbadge"><i class="fas ${isObj ? 'fa-circle-dot' : 'fa-pen-nib'}"></i><span class="qnum"></span>
-                    <span class="qtag">${isObj ? 'Objective' : 'Subjective'}</span></span>
+                <span class="qbadge">
+                    <i class="fas ${isObj ? 'fa-circle-dot' : (isCoding ? 'fa-code' : 'fa-pen-nib')}"></i>
+                    <span class="qnum"></span>
+                    <span class="qtag" style="${isCoding ? 'background:#fef3c7; color:#92400e; border-color:#fde68a;' : ''}">
+                        ${isObj ? 'Objective' : (isCoding ? 'Coding Challenge' : 'Subjective')}
+                    </span>
+                </span>
                 <button type="button" class="qdel" title="Delete question"><i class="fas fa-trash-can"></i></button>
             </div>
-            <textarea class="qtext" rows="3" placeholder="Enter the question"></textarea>
+            <textarea class="qtext" rows="3" placeholder="${isCoding ? 'Problem statement, constraints, and instructions' : 'Enter the question'}"></textarea>
             <div class="qrow">
-                <label>Marks <input type="number" class="qmarks" min="1" value="${isObj ? 1 : 5}"></label>
+                <label>Marks <input type="number" class="qmarks" min="1" value="${isObj ? 1 : (isCoding ? 10 : 5)}"></label>
+                ${isCoding ? `
+                <label>Language 
+                    <select class="qlang" style="width:130px; margin:0; padding:6px 8px;">
+                        <option value="python">Python 3</option>
+                        <option value="javascript">JavaScript (Node)</option>
+                        <option value="cpp">C++ (GCC)</option>
+                        <option value="c">C (GCC)</option>
+                        <option value="bash">Bash Script</option>
+                    </select>
+                </label>` : ''}
                 <label class="img-btn"><i class="fas fa-image"></i> Attach diagram
                     <input type="file" class="qimg" accept="image/*" style="display:none"></label>
                 <span class="img-name opt-hint"></span>
@@ -286,10 +317,15 @@
                 <div class="opts"></div>
                 <button type="button" class="add-opt"><i class="fas fa-plus"></i> Add option</button>
                 <div class="opt-hint">Edit any option text directly. Minimum 2, maximum 10 options.</div>`
+            : (isCoding ? `
+                <div class="opt-title">Test Cases (JSON format: [{"input": "...", "expected": "..."}])</div>
+                <textarea class="qtestcases" rows="3" placeholder='[{"input": "2 3\\n", "expected": "5"}, {"input": "10 20\\n", "expected": "30"}]'></textarea>
+                <div class="opt-title">Starter Template Code (Optional)</div>
+                <textarea class="qstarter" rows="3" placeholder="def solution():\n    pass"></textarea>`
             : `<div class="opt-title">Model answer (used by the AI grader &amp; teacher)</div>
                 <textarea class="qmodel" rows="3" placeholder="Ideal answer / key points the student should cover"></textarea>
                 <div class="opt-title">Marking rubric (optional)</div>
-                <textarea class="qrubric" rows="2" placeholder="e.g. 2 marks definition, 2 marks example, 1 mark clarity"></textarea>`}`;
+                <textarea class="qrubric" rows="2" placeholder="e.g. 2 marks definition, 2 marks example, 1 mark clarity"></textarea>`)}`;
         card.querySelector('.qdel').onclick = () => { card.remove(); refresh(); };
         card.querySelector('.qimg').onchange = e => card.querySelector('.img-name').textContent = e.target.files[0] ? e.target.files[0].name : '';
         if (isObj) {
@@ -325,6 +361,10 @@
                 const keep = q.options.map((o, idx) => o ? idx : -1).filter(idx => idx >= 0);
                 q.correct = keep.indexOf(sel);
                 q.options = keep.map(idx => q.options[idx]);
+            } else if (c.dataset.type === 'coding') {
+                q.language = c.querySelector('.qlang').value;
+                q.testcases = c.querySelector('.qtestcases').value.trim();
+                q.model_answer = c.querySelector('.qstarter').value; // starter code
             } else {
                 q.model_answer = c.querySelector('.qmodel').value.trim();
                 q.rubric = c.querySelector('.qrubric').value.trim();
@@ -356,15 +396,27 @@
 
         const count = parseInt(document.getElementById('ai-count').value) || 5;
         const type = document.getElementById('ai-format').value;
+        const ebookInput = document.getElementById('ai-ebook');
+        const startPage = document.getElementById('ai-start-page').value;
+        const endPage = document.getElementById('ai-end-page').value;
 
         btnAi.disabled = true;
-        aiBtnText.textContent = 'Generating on Spark...';
+        aiBtnText.textContent = 'Analyzing & Generating on Spark...';
 
         try {
+            const formData = new FormData();
+            formData.append('prompt', prompt);
+            formData.append('count', count);
+            formData.append('type', type);
+            if (ebookInput.files[0]) {
+                formData.append('ebook', ebookInput.files[0]);
+                if (startPage) formData.append('start_page', startPage);
+                if (endPage) formData.append('end_page', endPage);
+            }
+
             const resp = await fetch('/api/ai/generate_questions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt, count, type })
+                body: formData
             });
             const data = await resp.json();
             if (!data.success || !data.questions || !data.questions.length) {

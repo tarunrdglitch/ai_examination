@@ -9,6 +9,7 @@ Exam engine helpers (Phase 1).
 import os
 import shutil
 import json
+import glob
 
 # (table, column, definition) -- every statement is tried independently so
 # re-running on an already migrated database is harmless.
@@ -155,6 +156,20 @@ def erase_exam(connection, exam_id, authority_id):
         target = os.path.join(base, str(exam_id))
         if os.path.isdir(target):
             shutil.rmtree(target, ignore_errors=True)
+        # Also clean any loose chunk files like {exam_id}_*
+        for loose_file in glob.glob(os.path.join(base, f"{exam_id}_*")):
+            try:
+                os.remove(loose_file)
+            except OSError:
+                pass
+
+    # Purge any cloud storage archives for this exam
+    try:
+        from cloud_storage import cloud_storage
+        cloud_storage.delete_exam_data(exam_id)
+    except Exception as e:
+        print(f"Cloud storage purge error for exam {exam_id}: {e}")
+
     return True
 
 

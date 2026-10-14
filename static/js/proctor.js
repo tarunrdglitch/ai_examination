@@ -70,14 +70,17 @@ class WebExamProctor {
                 
                 // Convert distance to confidence score (0-100)
                 const confidence = Math.max(0, 100 * (1 - distance));
-                this.lastMatchConfidence = confidence;
-
                 if (confidence < this.options.matchThreshold) {
-                    this.logViolation('face_mismatch', `Face mismatch detected (confidence: ${confidence.toFixed(1)}%)`);
-                    return {
-                        status: 'mismatch',
-                        confidence
-                    };
+                    this.mismatchCount = (this.mismatchCount || 0) + 1;
+                    if (this.mismatchCount > (this.options.matchThresholdCount || 4)) {
+                        this.logViolation('face_mismatch', `Face mismatch detected (confidence: ${confidence.toFixed(1)}%)`);
+                        return {
+                            status: 'mismatch',
+                            confidence
+                        };
+                    }
+                } else {
+                    this.mismatchCount = 0;
                 }
 
                 // Check if looking away using landmarks

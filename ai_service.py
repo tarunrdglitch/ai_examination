@@ -42,11 +42,32 @@ def call_llm(messages, temperature=0.3, max_tokens=2048, response_format=None):
         return None
 
 
-def generate_questions_from_prompt(teacher_prompt, num_questions=5, question_type="both"):
+def extract_text_from_pdf(file_stream, start_page=None, end_page=None):
+    """Extract clean text from an uploaded eBook PDF within an optional page range."""
+    try:
+        from pypdf import PdfReader
+        reader = PdfReader(file_stream)
+        total_pages = len(reader.pages)
+        
+        start_idx = max(0, (start_page - 1) if start_page else 0)
+        end_idx = min(total_pages, end_page if end_page else total_pages)
+        
+        extracted = []
+        for i in range(start_idx, end_idx):
+            page_text = reader.pages[i].extract_text()
+            if page_text:
+                extracted.append(f"--- [Page {i+1}] ---\n{page_text}")
+                
+        return "\n\n".join(extracted)
+    except Exception as e:
+        logger.error(f"Error parsing PDF eBook: {e}")
+        return ""
+
+
+def generate_questions_from_prompt(teacher_prompt, num_questions=5, question_type="both", context_text=""):
     """
-    Given a teacher's prompt/topic description, parse and generate structured questions.
-    Returns list of question dicts:
-    [{'type': 'objective'|'subjective', 'text': '...', 'marks': 1, 'options': [...], 'correct': 0, 'model_answer': '...', 'rubric': '...'}]
+    Given a teacher's prompt/topic description and optional eBook context,
+    generate structured questions.
     """
     sys_prompt = """You are an academic exam generation engine running locally on a private examination server.
 Analyze the user request and generate questions accordingly in strict JSON format.
@@ -76,6 +97,9 @@ Rules:
 """
 
     user_msg = f"User Request: {teacher_prompt}\nTarget Question Count: {num_questions}\nRequested Format/Type: {question_type}"
+    if context_text:
+        # Limit to 12000 chars to avoid prompt context blowup
+        user_msg += f"\n\nReference eBook/Syllabus Context:\n{context_text[:12000]}"
 
     res = call_llm([
         {"role": "system", "content": sys_prompt},

@@ -458,7 +458,7 @@
         <img src="data:image/jpeg;base64,{{ question.question_image | b64encode }}" alt="Question Image" class="question-image">
         {% endif %}
         <p><strong>Marks:</strong> {{ question.marks }}</p>
-        {% if question.options_list %}
+        {% if question.exam_type == 'objective' and question.options_list %}
         <div class="mcq-options" role="radiogroup">
             {% for option in question.options_list %}
             <label class="mcq-option">
@@ -468,6 +468,29 @@
             </label>
             {% endfor %}
             <button type="button" class="mcq-clear" onclick="clearChoice(this)">Clear selection</button>
+        </div>
+        {% elif question.exam_type == 'coding' %}
+        <div class="coding-block" data-qid="{{ question.question_id }}" style="margin-top:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; color:#f8fafc; padding:8px 14px; border-radius:8px 8px 0 0; font-family:monospace; font-size:0.85rem;">
+                <span><i class="fas fa-terminal"></i> Language: <strong class="lang-tag">{{ question.language or 'python' }}</strong></span>
+                <div>
+                    <button type="button" class="dl-btn dl-btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="runCustomCode({{ question.question_id }})">
+                        <i class="fas fa-play"></i> Run Code
+                    </button>
+                    <button type="button" class="dl-btn" style="padding:4px 10px; font-size:0.75rem; background:#16a34a;" onclick="testAgainstCases({{ question.question_id }})">
+                        <i class="fas fa-flask"></i> Run Test Cases
+                    </button>
+                </div>
+            </div>
+            <textarea class="code-editor" data-question-id="{{ question.question_id }}" spellcheck="false"
+                      style="font-family:'Courier New', monospace; font-size:14px; background:#0f172a; color:#f1f5f9; border-radius:0 0 8px 8px; border:1px solid #1e293b; height:240px; width:100%; box-sizing:border-box; padding:12px; resize:vertical;">{{ question.model_answer or '' }}</textarea>
+            
+            <input type="hidden" id="testcases-{{ question.question_id }}" value="{{ question.testcases|e }}">
+            
+            <div class="code-output-box" id="output-{{ question.question_id }}" style="display:none; margin-top:10px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; font-family:monospace; font-size:0.82rem;">
+                <strong>Execution Output:</strong>
+                <pre class="out-text" style="margin:4px 0 0; white-space:pre-wrap; color:#0f172a;"></pre>
+            </div>
         </div>
         {% else %}
         <textarea placeholder="Your answer" data-question-id="{{ question.question_id }}"></textarea>
@@ -734,29 +757,27 @@ async function compareWithStoredEmbedding() {
             console.log('Verification result:', result);
 
             if (result.status === 'success' && result.similarity < 0.6) {
-    // Create canvas to capture current webcam image
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Convert to data URL
-    const currentImageData = canvas.toDataURL('image/jpeg', 0.9);
-    
-    // Handle the violation
-    const violations = ['Unauthorized person detected'];
-    const details = {
-        face_count: 1, // Assuming the unauthorized person is detected as a face
-        objects: [] // No objects detected in this case
-    };
-    
-    // Create violation notification
-    handleViolations(violations, currentImageData, details);
-    
-    // Log the violation to the server with image
-    logViolationWithImage('Unauthorized person detected', currentImageData);
-}
+                unauthorizedPersonStreak = (window.unauthorizedPersonStreak || 0) + 1;
+                window.unauthorizedPersonStreak = unauthorizedPersonStreak;
+                // Require at least 3 consecutive frames with mismatch before triggering alert
+                if (unauthorizedPersonStreak >= 3) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const context = canvas.getContext('2d');
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    const currentImageData = canvas.toDataURL('image/jpeg', 0.85);
+                    const violations = ['Unauthorized person detected'];
+                    const details = { face_count: 1, objects: [] };
+                    
+                    handleViolations(violations, currentImageData, details);
+                    logViolationWithImage('Unauthorized person detected', currentImageData);
+                    window.unauthorizedPersonStreak = 0; // reset after logging
+                }
+            } else {
+                window.unauthorizedPersonStreak = 0;
+            }
         } catch (error) {
             console.error('Comparison error:', error);
         }
@@ -895,32 +916,131 @@ function handleViolations(violations, violationImage, details) {
     }
 }
 
-// Modified startWebcam function with proctoring
+// Modified startWebcam function with proctoring & chunked session recording
+let mediaRecorder = null;
+let chunkIndex = 0;
+const recordEnabled = {{ 'true' if record_enabled else 'false' }};
+
+async function startSessionRecording(activeStream) {
+    if (!recordEnabled || !window.MediaRecorder) return;
+    try {
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+            ? 'video/webm;codecs=vp8,opus'
+            : (MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : '');
+
+        mediaRecorder = new MediaRecorder(activeStream, mimeType ? { mimeType } : {});
+        mediaRecorder.ondataavailable = async (e) => {
+            if (e.data && e.data.size > 0) {
+                const fd = new FormData();
+                fd.append('exam_id', examId);
+                fd.append('chunk_index', chunkIndex++);
+                fd.append('type', 'webcam');
+                fd.append('video_chunk', e.data);
+                fetch('/upload_recording_chunk', { method: 'POST', body: fd }).catch(err => console.warn('Chunk upload:', err));
+            }
+        };
+        // Slice chunks every 10 seconds so data is continuously committed to server
+        mediaRecorder.start(10000);
+        console.log('Continuous proctoring session recording started.');
+    } catch (err) {
+        console.warn('Could not start MediaRecorder:', err);
+    }
+}
+
+// Audio Proctoring: Web Audio Voice Activity Detection (VAD)
+let audioContext = null;
+let audioAnalyser = null;
+let speechStreakSeconds = 0;
+let vadInterval = null;
+
+function initAudioVAD(audioStream) {
+    try {
+        const audioTracks = audioStream.getAudioTracks();
+        if (!audioTracks || audioTracks.length === 0) return;
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        audioContext = new AudioCtx();
+        const source = audioContext.createMediaStreamSource(audioStream);
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 512;
+        audioAnalyser.smoothingTimeConstant = 0.4;
+        source.connect(audioAnalyser);
+
+        const dataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+
+        // Check speech band energy every 500ms
+        vadInterval = setInterval(() => {
+            if (!audioAnalyser) return;
+            audioAnalyser.getByteFrequencyData(dataArray);
+
+            // Compute human speech band energy (approx 300Hz - 3200Hz)
+            const sampleRate = audioContext.sampleRate || 44100;
+            const binWidth = sampleRate / 512;
+            const minBin = Math.max(0, Math.floor(300 / binWidth));
+            const maxBin = Math.min(dataArray.length - 1, Math.ceil(3200 / binWidth));
+
+            let sum = 0;
+            let count = 0;
+            for (let i = minBin; i <= maxBin; i++) {
+                sum += dataArray[i];
+                count++;
+            }
+            const averageVoiceEnergy = count > 0 ? (sum / count) : 0;
+
+            // Speech energy threshold: human conversation typically > 42
+            // Ambient fan, typing, mouse clicking typically < 25
+            if (averageVoiceEnergy > 42) {
+                speechStreakSeconds += 0.5;
+                // Require sustained voice activity (>= 3.0s) to avoid false alarms from coughs or keyboard clatter
+                if (speechStreakSeconds >= 3.0) {
+                    logViolation('sustained_speech_detected', `Voice activity detected for ${speechStreakSeconds.toFixed(1)}s`);
+                    speechStreakSeconds = 0; // Cooldown after alert
+                }
+            } else {
+                speechStreakSeconds = Math.max(0, speechStreakSeconds - 0.5);
+            }
+        }, 500);
+
+        console.log('Enterprise Audio VAD proctoring active.');
+    } catch (err) {
+        console.warn('Audio VAD skipped:', err);
+    }
+}
+
 async function startWebcam() {
     try {
         stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { width: 640, height: 480 }
+            video: { width: 640, height: 480 },
+            audio: true
         });
         video.srcObject = stream;
         
         // Wait for video to be ready
         video.onloadedmetadata = () => {
-            // Start frame capture and processing
             frameInterval = setInterval(captureAndProcessFrame, FRAME_CAPTURE_RATE);
+            startSessionRecording(stream);
+            initAudioVAD(stream);
         };
     } catch (error) {
         console.error("Webcam error:", error);
-        alert("Camera access required for exam participation! Please enable your camera and reload the page.");
-        
-        // Hide all elements except error
-        document.querySelector('.content').style.display = 'none';
-        document.querySelector('.navbar').style.display = 'none';
-        document.getElementById('webcam-monitor').style.display = 'none';
-        document.getElementById('calculator').style.display = 'none';
-        document.querySelector('.submit-btn').style.display = 'none';
-        
-        // Log violation
-        logViolation('webcam_access_denied', 'Student denied camera access');
+        // Fallback to video only if audio permission fails
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+            video.srcObject = stream;
+            video.onloadedmetadata = () => {
+                frameInterval = setInterval(captureAndProcessFrame, FRAME_CAPTURE_RATE);
+                startSessionRecording(stream);
+            };
+        } catch (e2) {
+            alert("Camera access required for exam participation! Please enable your camera and reload the page.");
+            document.querySelector('.content').style.display = 'none';
+            document.querySelector('.navbar').style.display = 'none';
+            document.getElementById('webcam-monitor').style.display = 'none';
+            document.getElementById('calculator').style.display = 'none';
+            document.querySelector('.submit-btn').style.display = 'none';
+            logViolation('webcam_access_denied', 'Student denied camera access');
+        }
     }
 }
 
@@ -1235,6 +1355,84 @@ function handleFullScreenChange() {
         submitExam();
         
         // No need to re-enter full screen since we're submitting and redirecting
+    }
+// Live Code Testing & Execution Functions
+async function runCustomCode(qid) {
+    const block = document.querySelector(`.coding-block[data-qid="${qid}"]`);
+    const code = block.querySelector('.code-editor').value;
+    const lang = block.querySelector('.lang-tag').textContent.trim();
+    const outBox = document.getElementById(`output-${qid}`);
+    const outPre = outBox.querySelector('.out-text');
+
+    outBox.style.display = 'block';
+    outPre.textContent = 'Compiling and executing in isolated container...';
+
+    try {
+        const resp = await fetch('/api/code/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ language: lang, code: code, input: '' })
+        });
+        const res = await resp.json();
+        if (res.success) {
+            outPre.textContent = res.stdout || '(Program completed with no console output)';
+            outPre.style.color = '#15803d';
+        } else {
+            outPre.textContent = res.stderr || 'Execution failed';
+            outPre.style.color = '#b91c1c';
+        }
+    } catch (err) {
+        outPre.textContent = 'Failed to communicate with compiler runner service.';
+        outPre.style.color = '#b91c1c';
+    }
+}
+
+async function testAgainstCases(qid) {
+    const block = document.querySelector(`.coding-block[data-qid="${qid}"]`);
+    const code = block.querySelector('.code-editor').value;
+    const lang = block.querySelector('.lang-tag').textContent.trim();
+    const outBox = document.getElementById(`output-${qid}`);
+    const outPre = outBox.querySelector('.out-text');
+    const tcRaw = document.getElementById(`testcases-${qid}`).value;
+
+    let testCases = [];
+    try {
+        testCases = JSON.parse(tcRaw || '[]');
+    } catch(e) {
+        testCases = [];
+    }
+
+    if (!testCases.length) {
+        alert('No pre-configured test cases found for this problem.');
+        return;
+    }
+
+    outBox.style.display = 'block';
+    outPre.textContent = `Running against ${testCases.length} test case(s)...`;
+
+    try {
+        const resp = await fetch('/api/code/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ language: lang, code: code, test_cases: testCases })
+        });
+        const res = await resp.json();
+        
+        let report = `Test Cases: ${res.passed_count}/${res.total} Passed\n`;
+        report += '--------------------------------------------------\n';
+        res.results.forEach(r => {
+            report += `Case #${r.case}: ${r.passed ? '✓ PASSED' : '✗ FAILED'}\n`;
+            if (!r.passed) {
+                report += `  Expected: ${r.expected}\n`;
+                report += `  Got:      ${r.actual || r.stderr}\n`;
+            }
+        });
+
+        outPre.textContent = report;
+        outPre.style.color = res.all_passed ? '#15803d' : '#b91c1c';
+    } catch (err) {
+        outPre.textContent = 'Test runner service error.';
+        outPre.style.color = '#b91c1c';
     }
 }
     </script>
