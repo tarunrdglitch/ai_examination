@@ -104,7 +104,7 @@ def run_test_cases(language, code, test_cases):
 
     for idx, tc in enumerate(test_cases or []):
         tc_in = str(tc.get('input', ''))
-        tc_expected = str(tc.get('expected', '')).strip()
+        tc_expected = str(tc.get('expected') or tc.get('expected_output') or tc.get('output') or '').strip()
         
         exec_out = execute_code(language, code, input_data=tc_in)
         actual = exec_out['stdout'].strip()
