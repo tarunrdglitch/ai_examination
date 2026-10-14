@@ -31,23 +31,23 @@ def get_llm_config():
                 # Pick preferred model if available
                 preferred = os.environ.get("LLM_MODEL")
                 if not preferred:
-                    for pref in ["nemotron-mini:latest", "nemotron-mini", "llama3.1:8b", "llama3.3:70b", "qwen2.5:3b"]:
+                    for pref in ["llama3.1:8b", "llama3.3:70b", "nemotron-mini:latest", "qwen2.5:3b"]:
                         if any(pref in m for m in models):
                             preferred = pref
                             break
                     if not preferred and models:
                         preferred = models[0]
-                return f"{base}/v1", preferred or "nemotron-mini"
+                return f"{base}/v1", preferred or "llama3.1:8b"
         except Exception:
             continue
-    return "http://127.0.0.1:11434/v1", os.environ.get("LLM_MODEL", "nemotron-mini")
+    return "http://127.0.0.1:11434/v1", os.environ.get("LLM_MODEL", "llama3.1:8b")
 
 
 LLM_BASE_URL, LLM_MODEL = get_llm_config()
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "dummy-key")
 
 
-def call_llm(messages, temperature=0.3, max_tokens=2048, response_format=None):
+def call_llm(messages, temperature=0.3, max_tokens=4096, response_format=None):
     """Call OpenAI-compatible chat completion endpoint on Spark."""
     url = f"{LLM_BASE_URL.rstrip('/')}/chat/completions"
     headers = {
@@ -127,7 +127,8 @@ The JSON must adhere to the following schema:
 Rules:
 1. Every objective question MUST have 4 options and 'correct' MUST be the 0-indexed integer of the right option.
 2. Subjective questions MUST include 'model_answer' and 'rubric'.
-3. Output ONLY the JSON block. No markdown wrapper if possible, or strictly within ```json ```.
+3. Output ONLY the valid JSON block.
+4. You MUST generate every single requested question completely. NEVER write comments like '// remaining' or placeholders. Every question must be fully articulated.
 """
 
     user_msg = f"User Request: {teacher_prompt}\nTarget Question Count: {num_questions}\nRequested Format/Type: {question_type}"
@@ -138,12 +139,13 @@ Rules:
     res = call_llm([
         {"role": "system", "content": sys_prompt},
         {"role": "user", "content": user_msg}
-    ], temperature=0.4, response_format={"type": "json_object"} if "vllm" in LLM_BASE_URL else None)
+    ], temperature=0.3, response_format={"type": "json_object"} if "vllm" in LLM_BASE_URL else None)
 
     if not res:
         return []
 
     try:
+        import re
         # Strip codeblock wrappers if present
         clean_res = res.strip()
         if clean_res.startswith("```json"):
@@ -153,6 +155,11 @@ Rules:
         if clean_res.endswith("```"):
             clean_res = clean_res[:-3]
         clean_res = clean_res.strip()
+
+        # Strip any C/JS single line comments: // ...
+        clean_res = re.sub(r'//.*', '', clean_res)
+        # Strip any trailing commas before closing braces/brackets
+        clean_res = re.sub(r',\s*([\]}])', r'\1', clean_res)
 
         parsed = json.loads(clean_res)
         if isinstance(parsed, list):
