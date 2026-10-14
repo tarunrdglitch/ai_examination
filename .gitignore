@@ -48,3 +48,4 @@ config.ini
 credentials.json
 # Dependencies
 node_modules/
+recordings/

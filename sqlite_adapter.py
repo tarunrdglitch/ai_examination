@@ -115,6 +115,11 @@ class SQLiteConnection:
     def __init__(self, db_path=DB_PATH):
         self._db_path = db_path
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=30.0)
+        try:
+            self._conn.execute('PRAGMA journal_mode=WAL')
+            self._conn.execute('PRAGMA synchronous=NORMAL')
+        except sqlite3.Error:
+            pass
         self._closed = False
 
     def cursor(self, dictionary=False, buffered=False):
@@ -137,7 +142,12 @@ class SQLiteConnection:
             except Exception:
                 pass
 
+_schema_ready = False
+
 def connect(**kwargs):
-    from init_db import init_sqlite_db
-    init_sqlite_db()
+    global _schema_ready
+    if not _schema_ready:
+        from init_db import init_sqlite_db
+        init_sqlite_db()
+        _schema_ready = True
     return SQLiteConnection()

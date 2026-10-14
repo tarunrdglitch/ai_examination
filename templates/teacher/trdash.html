@@ -128,8 +128,17 @@
                 <div class="card-menu" onclick="event.stopPropagation()">
                     <i class="fas fa-ellipsis-vertical"></i>
                     <div class="dropdown-content" data-exam-id="{{ exam.exam_id }}">
-                        <div class="dropdown-item delete" onclick="deleteExam('{{ exam.exam_id }}')">
-                            <i class="fas fa-trash-can"></i> Delete Exam
+                        {% if exam.status == 'stopped' %}
+                        <div class="dropdown-item" onclick="setExamState('{{ exam.exam_id }}', 'reopen')">
+                            <i class="fas fa-play"></i> Re-open Exam
+                        </div>
+                        {% else %}
+                        <div class="dropdown-item" onclick="setExamState('{{ exam.exam_id }}', 'stop')">
+                            <i class="fas fa-circle-stop"></i> Stop Exam (keep data)
+                        </div>
+                        {% endif %}
+                        <div class="dropdown-item delete" data-title="{{ exam.exam_title|e }}" onclick="deleteExam('{{ exam.exam_id }}', this.dataset.title)">
+                            <i class="fas fa-trash-can"></i> Delete &amp; Erase All Data
                         </div>
                     </div>
                 </div>
@@ -138,6 +147,13 @@
                     <i class="fas fa-clipboard-check"></i>
                 </div>
                 <h3>{{ exam.exam_title }}</h3>
+                <p style="margin-bottom:8px;">
+                    <span class="dl-badge {{ 'dl-badge-crimson' if exam.status == 'stopped' else '' }}" style="font-size: 11px;">
+                        <i class="fas {{ 'fa-circle-stop' if exam.status == 'stopped' else 'fa-circle-play' }}"></i>
+                        {{ 'Closed' if exam.status == 'stopped' else 'Open' }}
+                    </span>
+                    <span class="dl-badge" style="font-size: 11px; text-transform: capitalize;">{{ exam.exam_mode or 'objective' }}</span>
+                </p>
                 <p><i class="fas fa-calendar-day me-2 text-muted"></i>Date: <strong>{{ exam.exam_date }}</strong></p>
                 <p><i class="fas fa-clock me-2 text-muted"></i>Time: <strong>{{ exam.exam_time }}</strong></p>
                 <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
@@ -166,28 +182,34 @@
             }
         });
 
-        function deleteExam(examId) {
-            if (confirm('Are you sure you want to delete this examination? All candidate responses will be permanently removed.')) {
-                fetch(`/delete-exam/${examId}`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                })
-                .then(response => {
-                    if (!response.ok) return response.json().then(err => { throw err; });
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        alert('Failed to delete exam: ' + (data.error || 'Unknown error'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to delete exam.');
-                });
-            }
+        function setExamState(examId, action) {
+            const msg = action === 'stop'
+                ? 'Close this exam now? Students still inside will be auto-submitted and nobody new can join. All data is kept.'
+                : 'Re-open this exam so students can join again?';
+            if (!confirm(msg)) return;
+            fetch(`/teacher/exam/${examId}/${action}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(d => d.success ? window.location.reload() : alert(d.error || 'Failed'))
+                .catch(() => alert('Request failed.'));
+        }
+
+        function deleteExam(examId, title) {
+            const typed = prompt('This PERMANENTLY erases the exam, all answers, results, violations and recordings.\n\nType the exam name to confirm:\n' + title);
+            if (typed === null) return;
+            if (typed.trim() !== title.trim()) { alert('Name did not match. Nothing was deleted.'); return; }
+            fetch(`/delete-exam/${examId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+            })
+            .then(response => {
+                if (!response.ok) return response.json().then(err => { throw err; });
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) { window.location.reload(); }
+                else { alert('Failed to delete exam: ' + (data.error || 'Unknown error')); }
+            })
+            .catch(error => { console.error('Error:', error); alert('Failed to delete exam.'); });
         }
 
         document.querySelectorAll('.menu-item').forEach(item => {

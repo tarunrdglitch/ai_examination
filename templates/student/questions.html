@@ -402,6 +402,16 @@
         .modal-content button:hover:not(:disabled) {
             background-color: #2980b9;
         }
+        .mcq-options { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+        .mcq-option { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; background: #fff; transition: all .15s ease; user-select: none; }
+        .mcq-option:hover { border-color: #c91c28; background: #fff7f7; transform: translateX(2px); }
+        .mcq-option input { position: absolute; opacity: 0; pointer-events: none; }
+        .mcq-letter { width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9; color: #475569; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: none; transition: all .15s ease; }
+        .mcq-text { font-size: 1rem; color: #0f172a; }
+        .mcq-option:has(input:checked) { border-color: #c91c28; background: #fff1f2; box-shadow: 0 0 0 3px rgba(201,28,40,.12); }
+        .mcq-option:has(input:checked) .mcq-letter { background: #c91c28; color: #fff; }
+        .mcq-clear { align-self: flex-start; background: none; border: none; color: #64748b; font-size: .8rem; cursor: pointer; padding: 2px 4px; }
+        .mcq-clear:hover { color: #c91c28; text-decoration: underline; }
     </style>
 </head>
 
@@ -442,25 +452,29 @@
     <!-- Questions Content -->
 <div class="content" style="display: none;">
     {% for question in questions %}
-    <div class="question">
+    <div class="question" data-type="{{ question.exam_type }}">
         <h3>{{ loop.index }}. {{ question.question_text | replace('\r\n', '<br>') | replace('\n', '<br>') | safe }}</h3>
         {% if question.question_image %}
         <img src="data:image/jpeg;base64,{{ question.question_image | b64encode }}" alt="Question Image" class="question-image">
         {% endif %}
         <p><strong>Marks:</strong> {{ question.marks }}</p>
-        {% if question.options %}
-        <strong>Options:</strong> 
-        <ul>
-            {% for option in question.options.split('\n') %}
-                {% if option.strip() %}
-                <li>{{ option.replace('•', '').strip() }}</li>
-                {% endif %}
+        {% if question.options_list %}
+        <div class="mcq-options" role="radiogroup">
+            {% for option in question.options_list %}
+            <label class="mcq-option">
+                <input type="radio" name="q{{ question.question_id }}" value="{{ option }}" data-question-id="{{ question.question_id }}">
+                <span class="mcq-letter">{{ 'ABCDEFGHIJ'[loop.index0] }}</span>
+                <span class="mcq-text">{{ option }}</span>
+            </label>
             {% endfor %}
-        </ul>
-        {% endif %}
+            <button type="button" class="mcq-clear" onclick="clearChoice(this)">Clear selection</button>
+        </div>
+        {% else %}
         <textarea placeholder="Your answer" data-question-id="{{ question.question_id }}"></textarea>
+        {% endif %}
     </div>
     {% endfor %}
+
 </div>
 
     <!-- Scientific Calculator -->
@@ -650,6 +664,25 @@ let timeRemaining = '{{ exam_duration * 60 }}'; // Convert hours to seconds
 let stream;
 let isCameraOn = true;
 const examId = '{{ exam_id|tojson }}';
+
+function clearChoice(btn) {
+    btn.parentElement.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+}
+
+// If the teacher closes the exam manually, submit whatever the student has answered.
+let closingNow = false;
+setInterval(async () => {
+    if (closingNow) return;
+    try {
+        const r = await fetch('/exam_status/' + examId, { cache: 'no-store' });
+        const s = await r.json();
+        if (s.status === 'stopped' || s.status === 'deleted') {
+            closingNow = true;
+            alert('The examiner has closed this exam. Your answers are being submitted now.');
+            submitExam();
+        }
+    } catch (e) { /* offline blip - ignore, retry next tick */ }
+}, 10000);
 const userId = '{{ session.user_id|tojson }}';
 let frameInterval;
 

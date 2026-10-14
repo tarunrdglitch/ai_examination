@@ -58,6 +58,12 @@ def smart_db_connect(*args, **kwargs):
 
 mysql.connector.connect = smart_db_connect
 
+import exam_engine
+try:
+    exam_engine.migrate(lambda: mysql.connector.connect(**db_config))
+except Exception as _mig_err:
+    logging.getLogger(__name__).warning(f"Exam engine migration skipped: {_mig_err}")
+
 
 
 
@@ -993,7 +999,7 @@ def questions(exam_id):
         
         # Fetch exam details
         cursor.execute("""
-            SELECT exam_title, exam_duration 
+            SELECT exam_title, exam_duration, status 
             FROM exam_info 
             WHERE exam_id = %s
         """, (exam_id,))
@@ -1001,6 +1007,10 @@ def questions(exam_id):
         
         if not exam_info:
             flash("Exam not found!", "danger")
+            return redirect(url_for('studash'))
+
+        if (exam_info.get('status') or 'active') == 'stopped':
+            flash("This exam has been closed by the examiner.", "warning")
             return redirect(url_for('studash'))
         
         # Fetch exam questions including exam_type
@@ -1010,6 +1020,8 @@ def questions(exam_id):
             WHERE exam_id = %s
         """, (exam_id,))
         questions = cursor.fetchall()
+        for q in questions:
+            q['options_list'] = exam_engine.parse_options(q.get('options')) if q.get('exam_type') == 'objective' else []
         
         if not questions:
             flash("No questions found for this exam!", "warning")
@@ -1018,7 +1030,7 @@ def questions(exam_id):
         return render_template(
             'student/questions.html',
             exam_title=exam_info['exam_title'],
-            exam_duration=exam_info['exam_duration'],
+            exam_duration=exam_info['exam_duration'] or 60,
             questions=questions,
             exam_id=exam_id
         )
@@ -1093,6 +1105,13 @@ def submit_exam():
                 (answer_id, question_id, answer)
                 VALUES (%s, %s, %s)
             """, (answer_id, answer['question_id'], answer['answer']))
+
+        # Auto-grade multiple-choice answers; subjective ones wait for AI/teacher grading
+        obj_score, has_manual = exam_engine.grade_objective(cursor, exam_id, answer_id, answers)
+        cursor.execute(
+            "UPDATE student_result SET score = %s, status = %s WHERE answer_id = %s",
+            (obj_score, 'Pending Review' if has_manual else 'Graded', answer_id)
+        )
 
         # Commit transaction
         conn.commit()
@@ -2050,7 +2069,7 @@ def teacher_dashboard():
 
         # Fetch all exams created by the teacher
         cursor.execute("""
-            SELECT exam_id, exam_title, exam_date, exam_time, exam_link 
+            SELECT exam_id, exam_title, exam_date, exam_time, exam_link, status, exam_mode
             FROM exam_info 
             WHERE authority_id = %s
             ORDER BY created_at DESC
@@ -2076,21 +2095,10 @@ def delete_exam(exam_id):
         return jsonify({'success': False, 'error': 'Unauthorized'}), 401
 
     db = None
-    cursor = None
     try:
         db = mysql.connector.connect(**db_config)
-        cursor = db.cursor()
-
-        # Delete the exam only if it belongs to the current teacher
-        cursor.execute("""
-            DELETE FROM exam_info 
-            WHERE exam_id = %s AND authority_id = %s
-        """, (exam_id, authority_id))
-        
-        if cursor.rowcount == 0:
+        if not exam_engine.erase_exam(db, exam_id, authority_id):
             return jsonify({'success': False, 'error': 'Exam not found or unauthorized'}), 404
-
-        db.commit()
         return jsonify({'success': True})
 
     except mysql.connector.Error as err:
@@ -2098,6 +2106,57 @@ def delete_exam(exam_id):
             db.rollback()
         return jsonify({'success': False, 'error': str(err)}), 500
 
+    finally:
+        if db and db.is_connected():
+            db.close()
+
+
+@app.route('/teacher/exam/<int:exam_id>/<action>', methods=['POST'])
+def teacher_exam_state(exam_id, action):
+    """Manually close ("stop") or re-open an exam. Stopping keeps all data."""
+    authority_id = session.get('authority_id')
+    if not authority_id:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+    if action not in ('stop', 'reopen'):
+        return jsonify({'success': False, 'error': 'Unknown action'}), 400
+
+    db = cursor = None
+    try:
+        db = mysql.connector.connect(**db_config)
+        cursor = db.cursor()
+        if action == 'stop':
+            cursor.execute(
+                "UPDATE exam_info SET status = 'stopped', closed_at = %s WHERE exam_id = %s AND authority_id = %s",
+                (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), exam_id, authority_id))
+        else:
+            cursor.execute(
+                "UPDATE exam_info SET status = 'active', closed_at = NULL WHERE exam_id = %s AND authority_id = %s",
+                (exam_id, authority_id))
+        if cursor.rowcount == 0:
+            return jsonify({'success': False, 'error': 'Exam not found'}), 404
+        db.commit()
+        return jsonify({'success': True, 'status': 'stopped' if action == 'stop' else 'active'})
+    except mysql.connector.Error as err:
+        return jsonify({'success': False, 'error': str(err)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if db and db.is_connected():
+            db.close()
+
+
+@app.route('/exam_status/<int:exam_id>')
+def exam_status(exam_id):
+    """Polled by the student exam page; when 'stopped' the page auto-submits."""
+    db = cursor = None
+    try:
+        db = mysql.connector.connect(**db_config)
+        cursor = db.cursor()
+        cursor.execute("SELECT status FROM exam_info WHERE exam_id = %s", (exam_id,))
+        row = cursor.fetchone()
+        return jsonify({'status': (row[0] if row and row[0] else 'active') if row else 'deleted'})
+    except mysql.connector.Error:
+        return jsonify({'status': 'active'})
     finally:
         if cursor:
             cursor.close()
@@ -2140,9 +2199,30 @@ def teacher_createxm():
             db.close()
 
     if request.method == 'POST':
-        exam_title = request.form.get('exam-title')
-        exam_type = request.form.get('exam-type')
-        
+        exam_title = (request.form.get('exam-title') or '').strip()
+        try:
+            payload = json.loads(request.form.get('payload') or '{}')
+        except ValueError:
+            payload = {}
+        builder_questions = payload.get('questions') or []
+        if not exam_title or not builder_questions:
+            flash("Please give the exam a title and add at least one question.", "warning")
+            return redirect(url_for('teacher_createxm'))
+
+        types_used = {q.get('type') for q in builder_questions}
+        if types_used == {'objective'}:
+            exam_mode = 'objective'
+        elif types_used == {'subjective'}:
+            exam_mode = 'subjective'
+        else:
+            exam_mode = 'both'
+        try:
+            negative = float(payload.get('negative') or 0)
+        except (TypeError, ValueError):
+            negative = 0.0
+        record_enabled = 1 if payload.get('record') else 0
+
+        db = cursor = None
         try:
             db = mysql.connector.connect(**db_config)
             cursor = db.cursor()
@@ -2150,58 +2230,44 @@ def teacher_createxm():
             exam_id = int(uuid4().int & (1 << 31) - 1)
 
             cursor.execute(
-                """INSERT INTO exam_info (exam_id, authority_id, exam_title)
-                   VALUES (%s, %s, %s)""",
-                (exam_id, authority_id, exam_title)
+                """INSERT INTO exam_info (exam_id, authority_id, exam_title, status, exam_mode, record_enabled, negative_marking)
+                   VALUES (%s, %s, %s, 'active', %s, %s, %s)""",
+                (exam_id, authority_id, exam_title, exam_mode, record_enabled, negative)
             )
 
-            if exam_type == 'objective':
-                questions = request.form.getlist('questions[]')
-                obj_marks = request.form.getlist('obj-marks[]')
-                options = request.form.getlist('options[]')
-                correct_answers = request.form.getlist('correct_answers[]')
+            for i, q in enumerate(builder_questions):
+                qtype = 'objective' if q.get('type') == 'objective' else 'subjective'
+                text = (q.get('text') or '').strip()
+                if not text:
+                    continue
+                try:
+                    mark = int(q.get('marks') or 0)
+                except (TypeError, ValueError):
+                    mark = 0
 
-                for i, question in enumerate(questions):
+                image = request.files.get(f'img_{i}')
+                image_data = image.read() if image and image.filename else None
+
+                options_text = None
+                correct_answer = None
+                if qtype == 'objective':
+                    opts = [str(o).strip() for o in (q.get('options') or []) if str(o).strip()]
+                    options_text = "\n".join(opts)
                     try:
-                        # Convert marks to integer, default to 0 if conversion fails
-                        mark = int(obj_marks[i]) if i < len(obj_marks) and obj_marks[i] else 0
-                    except (ValueError, IndexError):
-                        mark = 0
+                        correct_answer = int(q.get('correct'))
+                    except (TypeError, ValueError):
+                        correct_answer = None
+                    if correct_answer is not None and not (0 <= correct_answer < len(opts)):
+                        correct_answer = None
 
-                    # Get correct answer value
-                    correct_answer = int(correct_answers[i]) if i < len(correct_answers) and correct_answers[i] else None
-
-                    question_image = request.files.get(f'upload-image-obj-{i+1}')
-                    image_data = question_image.read() if question_image and question_image.filename else None
-
-                    cursor.execute(
-                        """INSERT INTO exam_questions 
-                        (authority_id, exam_id, exam_title, exam_type, question_text, question_image, marks, options, correct_answer) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                        (authority_id, exam_id, exam_title, exam_type, question, image_data, mark, 
-                         options[i] if i < len(options) else None, correct_answer)
-                    )
-
-            elif exam_type == 'subjective':
-                subj_questions = request.form.getlist('subj-questions[]')
-                subj_marks = request.form.getlist('subj-marks[]')
-
-                for i, question in enumerate(subj_questions):
-                    try:
-                        # Convert marks to integer, default to 0 if conversion fails
-                        mark = int(subj_marks[i]) if i < len(subj_marks) and subj_marks[i] else 0
-                    except (ValueError, IndexError):
-                        mark = 0
-
-                    question_image = request.files.get(f'upload-image-subj-{i+1}')
-                    image_data = question_image.read() if question_image and question_image.filename else None
-
-                    cursor.execute(
-                        """INSERT INTO exam_questions 
-                        (authority_id, exam_id, exam_title, exam_type, question_text, question_image, marks) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                        (authority_id, exam_id, exam_title, exam_type, question, image_data, mark)
-                    )
+                cursor.execute(
+                    """INSERT INTO exam_questions
+                       (authority_id, exam_id, exam_title, exam_type, question_text, question_image,
+                        marks, options, correct_answer, model_answer, rubric)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    (authority_id, exam_id, exam_title, qtype, text, image_data, mark,
+                     options_text, correct_answer, q.get('model_answer'), q.get('rubric'))
+                )
             
             db.commit()
             flash("Exam created successfully!", "success")
@@ -2309,7 +2375,7 @@ def show_exam(exam_id):
 
         return render_template('teacher/show.html', 
                                exam_title=exam_info['exam_title'], 
-                               exam_duration=exam_info['exam_duration'], 
+                               exam_duration=exam_info['exam_duration'] or 60, 
                                exam_rules=exam_info['exam_rules'], 
                                exam_date=exam_info['exam_date'], 
                                exam_time=exam_info['exam_time'], 
@@ -2740,7 +2806,7 @@ def verify_exam_link():
         
         # Fetch exam details
         cursor.execute("""
-            SELECT exam_id, exam_title, exam_date, exam_time, exam_duration 
+            SELECT exam_id, exam_title, exam_date, exam_time, exam_duration, status 
             FROM exam_info 
             WHERE exam_link = %s
         """, (exam_link,))
@@ -2754,6 +2820,9 @@ def verify_exam_link():
         debug_info = {}
         
         # Check if exam date and time are set
+        if (exam.get('status') or 'active') == 'stopped':
+            return jsonify({'valid': False, 'message': 'This exam has been closed by the examiner.'})
+
         if not exam['exam_date'] or not exam['exam_time']:
             return jsonify({'valid': False, 'message': 'Exam timing not set'})
         

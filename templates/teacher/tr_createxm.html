@@ -119,218 +119,202 @@
             <p style="color: var(--text-secondary); margin: 0; font-size: 0.92rem;">Author questions, assign marks, upload diagrams, and configure assessment schema</p>
         </div>
 
+        <form id="exam-form" action="/teacher/tr_createxm" method="post" enctype="multipart/form-data">
         <div class="form-section">
             <h3><i class="fas fa-sliders me-2 text-danger"></i> Assessment Configuration</h3>
-            <form id="exam-form" action="/teacher/tr_createxm" method="post" enctype="multipart/form-data">
-                <label for="exam-title">Examination Title</label>
-                <input type="text" id="exam-title" name="exam-title" placeholder="e.g. CS401: Deep Learning Foundations Midterm" required>
+            <label for="exam-title">Examination Title</label>
+            <input type="text" id="exam-title" name="exam-title" placeholder="e.g. CS401: Deep Learning Foundations Midterm" required>
 
-                <label for="exam-type">Question Schema Format</label>
-                <select id="exam-type" name="exam-type" required>
-                    <option value="">Select format schema</option>
-                    <option value="subjective">Subjective / Free-form Response</option>
-                    <option value="objective">Objective / Multiple Choice</option>
-                </select>
-
-                <!-- Objective Fields -->
-                <div id="objective-fields" class="hidden">
-                    <div class="question-block">
-                        <div class="question-number"><i class="fas fa-circle-dot"></i> Question 1 (Objective)</div>
-                        <div style="position: relative; display: flex; align-items: center;">
-                            <textarea name="questions[]" rows="4" placeholder="Enter question description or problem statement here"></textarea>
-                            <label for="upload-image-obj-1" style="cursor: pointer; position: absolute; bottom: 10px; right: 12px;">
-                                <i class="fas fa-image" style="font-size: 20px; color: var(--accent);" title="Upload reference diagram"></i>
-                            </label>
-                            <input type="file" name="upload-image-obj-1" id="upload-image-obj-1" accept="image/*" style="display: none;" onchange="previewImage(this)">
-                        </div>
-                        <div style="margin: 10px 0 14px;">
-                            <label style="display: inline-flex; align-items: center;">Allocated Marks: <input type="number" name="obj-marks[]" class="question-mark" placeholder="Pts" min="1"></label>
-                        </div>
-                        <label for="options">Multiple Choice Options (One per line)</label>
-                        <textarea name="options[]" rows="3" placeholder="Enter options, press Enter for each"></textarea>
-                    </div>
+            <div class="cfg-grid">
+                <div>
+                    <label for="neg-marking">Negative marking (per wrong MCQ)</label>
+                    <input type="number" id="neg-marking" min="0" step="0.25" value="0">
                 </div>
-
-                <!-- Subjective Fields -->
-                <div id="subjective-fields" class="hidden">
-                    <div class="question-block">
-                        <div class="question-number"><i class="fas fa-pen-nib"></i> Question 1 (Subjective)</div>
-                        <div style="position: relative; display: flex; align-items: center;">
-                            <textarea name="subj-questions[]" rows="4" placeholder="Enter essay prompt, coding challenge, or subjective question text"></textarea>
-                            <label for="upload-image-subj-1" style="cursor: pointer; position: absolute; bottom: 10px; right: 12px;">
-                                <i class="fas fa-image" style="font-size: 20px; color: var(--accent);" title="Upload reference diagram"></i>
-                            </label>
-                            <input type="file" name="upload-image-subj-1" id="upload-image-subj-1" accept="image/*" style="display: none;" onchange="previewImage(this)">
-                        </div>
-                        <div style="margin: 10px 0;">
-                            <label style="display: inline-flex; align-items: center;">Allocated Marks: <input type="number" name="subj-marks[]" class="question-mark" placeholder="Pts" min="1"></label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-footer">
-                    <button type="button" id="add-question" class="dl-btn dl-btn-secondary"><i class="fas fa-plus"></i> Add Next Question</button>
-                    <button type="submit" class="dl-btn"><i class="fas fa-arrow-right"></i> Save & Continue to Instructions</button>
-                </div>
-            </form>
+                <label class="switch-row" for="record-toggle">
+                    <input type="checkbox" id="record-toggle">
+                    <span><strong><i class="fas fa-circle-dot" style="color:var(--accent)"></i> Record webcam, audio &amp; screen</strong>
+                    <small>Students are told they are being recorded. Recordings are erased when the exam is deleted.</small></span>
+                </label>
+            </div>
+            <div class="mode-pill" id="mode-pill"><i class="fas fa-layer-group"></i> Exam type: <strong id="mode-label">Add questions below</strong></div>
         </div>
+
+        <div id="question-list"></div>
+
+        <div class="form-section add-bar">
+            <span class="add-bar-title">Add a question</span>
+            <button type="button" class="dl-btn dl-btn-secondary" data-add="objective"><i class="fas fa-circle-dot"></i> Objective (MCQ)</button>
+            <button type="button" class="dl-btn dl-btn-secondary" data-add="subjective"><i class="fas fa-pen-nib"></i> Subjective</button>
+        </div>
+
+        <div class="form-footer">
+            <button type="submit" class="dl-btn"><i class="fas fa-arrow-right"></i> Save &amp; Continue to Instructions</button>
+        </div>
+        <input type="hidden" name="payload" id="payload">
+        </form>
     </div>
 
+<style>
+    .cfg-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; align-items: start; }
+    .switch-row { display: flex !important; gap: 12px; align-items: flex-start; background: var(--bg-canvas); border: 1px solid var(--border); padding: 14px 16px; border-radius: var(--radius-lg); cursor: pointer; margin: 0 !important; }
+    .switch-row input { width: 18px !important; height: 18px; margin: 3px 0 0 !important; accent-color: var(--accent); }
+    .switch-row small { display: block; color: var(--text-secondary); font-weight: 500; margin-top: 3px; }
+    .mode-pill { display: inline-flex; gap: 8px; align-items: center; background: var(--accent-light); border: 1px solid var(--accent-border); color: var(--accent); padding: 7px 14px; border-radius: 30px; font-size: 0.82rem; }
+    .qcard { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 24px 26px; margin-bottom: 20px; box-shadow: var(--shadow-sm); animation: qin .25s ease; }
+    @keyframes qin { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: none; } }
+    .qhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .qbadge { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); display: flex; gap: 8px; align-items: center; }
+    .qtag { font-size: 0.68rem; background: var(--accent-light); border: 1px solid var(--accent-border); padding: 2px 9px; border-radius: 20px; }
+    .qdel { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 15px; padding: 6px; border-radius: 8px; }
+    .qdel:hover { color: var(--error); background: #fff1f2; }
+    .qrow { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .qrow label { margin: 0 !important; display: flex; align-items: center; gap: 8px; }
+    .qrow input[type=number] { width: 90px; margin: 0 !important; }
+    .img-btn { cursor: pointer; color: var(--accent); font-size: 0.85rem; font-weight: 600; display: inline-flex; gap: 6px; align-items: center; }
+    .opt-title { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin: 6px 0 8px; }
+    .opt-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .opt-row input[type=radio] { width: 18px !important; height: 18px; margin: 0 !important; accent-color: var(--accent); flex: none; }
+    .opt-row input[type=text] { margin: 0 !important; flex: 1; }
+    .opt-letter { width: 26px; height: 26px; border-radius: 50%; background: var(--accent-light); color: var(--accent); font-weight: 700; font-size: 0.78rem; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+    .opt-row .rm { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; }
+    .opt-row .rm:hover { color: var(--error); }
+    .opt-hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+    .add-opt { background: none; border: 1px dashed var(--accent-border); color: var(--accent); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.82rem; margin-top: 4px; }
+    .add-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .add-bar-title { font-weight: 700; margin-right: auto; }
+    .qcard textarea.qtext { margin-bottom: 12px; }
+    .qcard textarea, .qcard input[type=text], .qcard input[type=number] {
+        width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+        font-size: 14px; font-family: inherit; box-sizing: border-box; transition: all .2s ease; margin-bottom: 10px;
+    }
+    .qcard textarea:focus, .qcard input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-glow); }
+    .qcard .qrow input[type=number] { width: 90px; }
+</style>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const examType = document.getElementById("exam-type");
-    const objectiveFields = document.getElementById("objective-fields");
-    const subjectiveFields = document.getElementById("subjective-fields");
-    const addQuestionBtn = document.getElementById("add-question");
-    let questionNumber = 1;
+(function () {
+    const list = document.getElementById('question-list');
+    const modeLabel = document.getElementById('mode-label');
+    const letters = 'ABCDEFGHIJ';
+    let uid = 0;
 
-    examType.addEventListener("change", () => {
-        if (examType.value === "objective") {
-            objectiveFields.classList.remove("hidden");
-            subjectiveFields.classList.add("hidden");
-            const optionsTextarea = document.querySelector('textarea[name="options[]"]');
-            if (optionsTextarea && optionsTextarea.value === '') {
-                optionsTextarea.value = '• ';
-            }
-        } else if (examType.value === "subjective") {
-            subjectiveFields.classList.remove("hidden");
-            objectiveFields.classList.add("hidden");
-        } else {
-            objectiveFields.classList.add("hidden");
-            subjectiveFields.classList.add("hidden");
+    function refresh() {
+        const cards = [...list.querySelectorAll('.qcard')];
+        cards.forEach((c, i) => c.querySelector('.qnum').textContent = 'Question ' + (i + 1));
+        const types = new Set(cards.map(c => c.dataset.type));
+        modeLabel.textContent = !types.size ? 'Add questions below'
+            : types.size > 1 ? 'Both (Objective + Subjective)'
+            : types.has('objective') ? 'Objective' : 'Subjective';
+    }
+
+    function renumberOptions(card) {
+        card.querySelectorAll('.opt-row').forEach((r, i) => r.querySelector('.opt-letter').textContent = letters[i] || i + 1);
+    }
+
+    function addOption(card, value = '', checked = false) {
+        const box = card.querySelector('.opts');
+        if (box.children.length >= 10) return;
+        const row = document.createElement('div');
+        row.className = 'opt-row';
+        row.innerHTML = `<input type="radio" name="correct-${card.dataset.uid}" title="Mark as correct answer">
+            <span class="opt-letter"></span>
+            <input type="text" placeholder="Option text">
+            <button type="button" class="rm" title="Remove option"><i class="fas fa-xmark"></i></button>`;
+        row.querySelector('input[type=text]').value = value;
+        row.querySelector('input[type=radio]').checked = checked;
+        row.querySelector('.rm').onclick = () => { if (box.children.length > 2) { row.remove(); renumberOptions(card); } };
+        box.appendChild(row);
+        renumberOptions(card);
+    }
+
+    function addQuestion(type) {
+        uid++;
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        card.dataset.type = type;
+        card.dataset.uid = uid;
+        const isObj = type === 'objective';
+        card.innerHTML = `
+            <div class="qhead">
+                <span class="qbadge"><i class="fas ${isObj ? 'fa-circle-dot' : 'fa-pen-nib'}"></i><span class="qnum"></span>
+                    <span class="qtag">${isObj ? 'Objective' : 'Subjective'}</span></span>
+                <button type="button" class="qdel" title="Delete question"><i class="fas fa-trash-can"></i></button>
+            </div>
+            <textarea class="qtext" rows="3" placeholder="Enter the question"></textarea>
+            <div class="qrow">
+                <label>Marks <input type="number" class="qmarks" min="1" value="${isObj ? 1 : 5}"></label>
+                <label class="img-btn"><i class="fas fa-image"></i> Attach diagram
+                    <input type="file" class="qimg" accept="image/*" style="display:none"></label>
+                <span class="img-name opt-hint"></span>
+            </div>
+            ${isObj ? `<div class="opt-title">Options &mdash; click the circle to mark the correct answer</div>
+                <div class="opts"></div>
+                <button type="button" class="add-opt"><i class="fas fa-plus"></i> Add option</button>
+                <div class="opt-hint">Edit any option text directly. Minimum 2, maximum 10 options.</div>`
+            : `<div class="opt-title">Model answer (used by the AI grader &amp; teacher)</div>
+                <textarea class="qmodel" rows="3" placeholder="Ideal answer / key points the student should cover"></textarea>
+                <div class="opt-title">Marking rubric (optional)</div>
+                <textarea class="qrubric" rows="2" placeholder="e.g. 2 marks definition, 2 marks example, 1 mark clarity"></textarea>`}`;
+        card.querySelector('.qdel').onclick = () => { card.remove(); refresh(); };
+        card.querySelector('.qimg').onchange = e => card.querySelector('.img-name').textContent = e.target.files[0] ? e.target.files[0].name : '';
+        if (isObj) {
+            for (let i = 0; i < 4; i++) addOption(card);
+            card.querySelector('.add-opt').onclick = () => addOption(card);
         }
+        list.appendChild(card);
+        refresh();
+        card.querySelector('.qtext').focus();
+    }
+
+    document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => addQuestion(b.dataset.add));
+    addQuestion('objective');
+
+    document.getElementById('exam-form').addEventListener('submit', function (e) {
+        const cards = [...list.querySelectorAll('.qcard')];
+        const questions = [];
+        let error = '';
+        // file inputs are renamed by position so the server can match images to questions
+        cards.forEach((c, i) => {
+            const isObj = c.dataset.type === 'objective';
+            const text = c.querySelector('.qtext').value.trim();
+            const q = { type: c.dataset.type, text, marks: parseInt(c.querySelector('.qmarks').value) || 0 };
+            if (!text) error = error || `Question ${i + 1} is empty.`;
+            if (isObj) {
+                const rows = [...c.querySelectorAll('.opt-row')];
+                q.options = rows.map(r => r.querySelector('input[type=text]').value.trim());
+                const filled = q.options.filter(Boolean).length;
+                if (filled < 2) error = error || `Question ${i + 1} needs at least 2 options.`;
+                const sel = rows.findIndex(r => r.querySelector('input[type=radio]').checked);
+                if (sel < 0 || !q.options[sel]) error = error || `Question ${i + 1}: mark the correct option.`;
+                // compact blank options and remap the correct index
+                const keep = q.options.map((o, idx) => o ? idx : -1).filter(idx => idx >= 0);
+                q.correct = keep.indexOf(sel);
+                q.options = keep.map(idx => q.options[idx]);
+            } else {
+                q.model_answer = c.querySelector('.qmodel').value.trim();
+                q.rubric = c.querySelector('.qrubric').value.trim();
+            }
+            c.querySelector('.qimg').name = 'img_' + i;
+            questions.push(q);
+        });
+        if (!cards.length) error = 'Add at least one question.';
+        if (error) { e.preventDefault(); alert(error); return; }
+        document.getElementById('payload').value = JSON.stringify({
+            questions,
+            negative: parseFloat(document.getElementById('neg-marking').value) || 0,
+            record: document.getElementById('record-toggle').checked
+        });
     });
 
-    function formatOptionsText(textarea) {
-        if (textarea.value === '') {
-            textarea.value = '• ';
-        }
-        
-        textarea.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+            if (this.href.includes('logout')) {
                 e.preventDefault();
-                const currentPos = this.selectionStart;
-                const text = this.value;
-                this.value = text.substring(0, currentPos) + '\n• ' + text.substring(currentPos);
-                this.selectionStart = this.selectionEnd = currentPos + 3;
-            }
-            if (e.key === 'Backspace') {
-                const currentPos = this.selectionStart;
-                const text = this.value;
-                if (currentPos > 0 && text.substring(currentPos - 2, currentPos) === '• ') {
-                    e.preventDefault();
-                    this.value = text.substring(0, currentPos - 2) + text.substring(currentPos);
-                    this.selectionStart = this.selectionEnd = currentPos - 2;
-                }
+                if (confirm('Are you sure you want to end your educator session?')) window.location.href = this.href;
             }
         });
-    }
-
-    const initialOptionsTextarea = document.querySelector('textarea[name="options[]"]');
-    if (initialOptionsTextarea) {
-        formatOptionsText(initialOptionsTextarea);
-    }
-
-    addQuestionBtn.addEventListener("click", function () {
-        if (!examType.value) {
-            alert("Please select an exam format schema first.");
-            return;
-        }
-
-        const isObjective = examType.value === "objective";
-        const container = isObjective ? objectiveFields : subjectiveFields;
-        questionNumber++;
-
-        const fileInputId = `upload-image-${isObjective ? 'obj' : 'subj'}-${questionNumber}`;
-        
-        const newQuestionBlock = document.createElement("div");
-        newQuestionBlock.className = "question-block";
-        newQuestionBlock.innerHTML = `
-            <div class="question-number"><i class="fas fa-circle-dot"></i> Question ${questionNumber} (${isObjective ? 'Objective' : 'Subjective'})</div>
-            <div style="position: relative; display: flex; align-items: center;">
-                <textarea name="${isObjective ? 'questions[]' : 'subj-questions[]'}" rows="4" placeholder="Enter question description or problem statement here"></textarea>
-                <label for="${fileInputId}" style="cursor: pointer; position: absolute; bottom: 10px; right: 12px;">
-                    <i class="fas fa-image" style="font-size: 20px; color: var(--accent);"></i>
-                </label>
-                <input type="file" id="${fileInputId}" name="${fileInputId}" accept="image/*" style="display: none;">
-            </div>
-            <div style="margin: 10px 0 14px;">
-                <label style="display: inline-flex; align-items: center;">Allocated Marks: <input type="number" name="${isObjective ? 'obj-marks[]' : 'subj-marks[]'}" class="question-mark" placeholder="Pts" required min="1"></label>
-            </div>
-            ${isObjective ? '<label for="options">Multiple Choice Options</label><textarea name="options[]" rows="3" placeholder="Enter options, press Enter for each"></textarea>' : ''}
-        `;
-
-        container.appendChild(newQuestionBlock);
-
-        document.getElementById(fileInputId).addEventListener("change", function () {
-            previewImage(this);
-        });
-
-        const newOptionsTextarea = newQuestionBlock.querySelector('textarea[name="options[]"]');
-        if (newOptionsTextarea) {
-            formatOptionsText(newOptionsTextarea);
-            newOptionsTextarea.value = '• ';
-        }
     });
-});
-
-function previewImage(input) {
-    const parentDiv = input.closest(".question-block");
-    const textarea = parentDiv.querySelector("textarea");
-    const file = input.files[0];
-
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const existingImg = parentDiv.querySelector(".preview-image");
-            if (existingImg) existingImg.remove();
-
-            const img = document.createElement("img");
-            img.src = e.target.result;
-            img.className = "preview-image";
-            img.style.maxWidth = "120px";
-            img.style.maxHeight = "120px";
-            img.style.marginTop = "10px";
-
-            const closeIcon = document.createElement("span");
-            closeIcon.innerHTML = "&times;";
-            closeIcon.style.position = "absolute";
-            closeIcon.style.top = "-10px";
-            closeIcon.style.right = "-10px";
-            closeIcon.style.cursor = "pointer";
-            closeIcon.style.color = "white";
-            closeIcon.style.backgroundColor = "var(--error)";
-            closeIcon.style.borderRadius = "50%";
-            closeIcon.style.padding = "2px 6px";
-            closeIcon.style.fontSize = "14px";
-            closeIcon.style.fontWeight = "bold";
-            closeIcon.onclick = function () {
-                container.remove();
-                input.value = "";
-            };
-
-            const container = document.createElement("div");
-            container.style.position = "relative";
-            container.style.display = "inline-block";
-            container.appendChild(img);
-            container.appendChild(closeIcon);
-
-            textarea.insertAdjacentElement("afterend", container);
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-document.querySelectorAll('.menu-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-        if(this.href.includes('logout')) {
-            e.preventDefault();
-            if(confirm('Are you sure you want to end your educator session?')) {
-                window.location.href = this.href;
-            }
-        }
-    });
-});
+})();
 </script>
 </body>
 </html>
