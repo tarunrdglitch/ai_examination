@@ -3,7 +3,8 @@ FROM python:3.10-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    DISPLAY=:99
+    DISPLAY=:99 \
+    CMAKE_POLICY_VERSION_MINIMUM=3.5
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential cmake pkg-config libopenblas-dev liblapack-dev \
