@@ -3,337 +3,431 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proctoring Solution | OnlineEx</title>
+    <title>DL Procted Examination | Enterprise AI Proctoring Platform</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
         :root {
-            --primary-blue: #2c5aa0;
-            --secondary-blue: #4a90e2;
-            --dark-gray: #2c3e50;
-            --light-gray: #7f8c8d;
-
-        } 
-
-        
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--dark-gray);
-            scroll-behavior: smooth;
+            --primary-accent: #c91c28;
+            --primary-hover: #b91c1c;
+            --text-dark: #09090b;
+            --text-sub: #475569;
         }
 
-        /* Navbar */
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            background-color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* DL Navbar */
         .navbar {
-            background: white;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem 0;
-            height: 80px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.9rem 0;
+            transition: all 0.25s ease;
         }
 
         .navbar-brand {
-            font-size: 1.8rem;
-            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.35rem;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .navbar-brand img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.06));
+        }
+
+        .navbar-brand .brand-tag {
+            color: var(--accent);
         }
 
         .nav-link {
-            font-size: 1.3rem;
-            font-weight: 500;
-            color: var(--dark-gray);
-            transition: color 0.3s ease;
+            font-size: 0.96rem;
+            font-weight: 600;
+            color: var(--text-sub) !important;
+            padding: 0.5rem 1rem !important;
+            transition: color 0.2s ease;
         }
 
         .nav-link:hover {
-            color: var(--primary-blue);
-        }
-        
-
-        /* Hero Section */
-        .hero-section {
-            background: linear-gradient(135deg, #f9fbff 0%, #e6efff 100%);
-            padding: 10rem 0 10rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            color: var(--accent) !important;
         }
 
-        .section-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--primary-blue);
+        .nav-login-btn {
+            background: var(--accent-gradient) !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            border-radius: var(--radius);
+            padding: 0.5rem 1.25rem !important;
+            box-shadow: 0 2px 8px rgba(201, 28, 40, 0.25);
         }
 
-        .lead-text {
-            font-size: 1.3rem;
-            color: var(--light-gray);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .feature-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 2.5rem;
-            margin: 1rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            color: var(--secondary-blue);
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-section {
-            background: var(--primary-blue);
-            color: white;
-            padding: 4rem 0;
-        }
-
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .testimonial-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 2rem;
-            margin: 1rem;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        }
-
-        .footer {
-            background: #1a2b4d;
-            color: white;
-            padding: 4rem 0 2rem;
-        }
-
-        .navbar {
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-        }
-
-        /* Text Field for Enter Exam Code */
-        .test-link-input {
-            padding: 0.8rem 1.2rem; /* Decrease padding to reduce height and width */
-            font-size: 1rem; /* Decrease font size */
-            border-radius: 0.75rem; /* Keep border radius for rounded corners */
-            width: 80%; /* Decrease width, adjust to your preference */
-            margin: 0 auto; /* Center the input field */
-        }
-
-        .btn-primary {
-            background: var(--primary-blue);
-            border: none;
-            padding: 0.8rem 2rem; /* Decrease padding for smaller button */
-            font-size: 1rem; /* Decrease font size */
-            border-radius: 0.75rem; /* Keep border radius for rounded corners */
-        }
-
-        /* Create New Exam Button */
-        .btn-primary + .btn-primary {
-            padding: 0.8rem 2rem; /* Decrease padding for smaller button */
-            font-size: 1rem; /* Decrease font size */
-            border-radius: 0.75rem; /* Keep border radius for rounded corners */
-        }
-
-
-        .btn-primary:hover {
-            background: #1f4785;
-        }
-
-        /* Dropdown */
         .dropdown-menu {
-            min-width: 150px;
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border: none;
-            transform: translateY(10px);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease-in-out;
-            border-right: 2px solid var(--primary-blue); /* Add right border */
-        }
-
-        .dropdown:hover .dropdown-menu {
-            transform: translateY(0);
-            opacity: 1;
-            visibility: visible;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 0.6rem;
+            min-width: 200px;
         }
 
         .dropdown-item {
-            font-size: 1rem;
-            color: #2c3e50;
-            transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            font-size: 0.92rem;
+            padding: 0.65rem 1rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-dark);
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .dropdown-item:hover {
-            background: #f0f4ff;
-            color: #2c5aa0;
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: radial-gradient(circle at 50% 20%, rgba(201, 28, 40, 0.04) 0%, #ffffff 70%);
+            padding: 8rem 0 6rem;
+            text-align: center;
+            position: relative;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid var(--accent-border);
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            color: var(--text-dark);
+            margin-bottom: 1.4rem;
+        }
+
+        .section-title .crimson-gradient {
+            background: linear-gradient(135deg, #c91c28 0%, #991b1b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lead-text {
+            font-size: 1.25rem;
+            color: var(--text-sub);
+            max-width: 680px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.6;
+        }
+
+        /* Test Join Bar */
+        .join-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 12px 35px -5px rgba(15, 23, 42, 0.08);
+            padding: 10px;
+            max-width: 680px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn-create-test {
-            background-color: #788ec7;
-            color: #fff;
-            font-size: 1rem;
-            padding: 0.7rem 2rem;
-            border-radius: 0.5rem;
-            border: none;
-            margin-right: 1rem;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            color: var(--text-dark);
+            padding: 0.75rem 1.4rem;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
         }
 
         .btn-create-test:hover {
-            background-color: #357abd;
+            background: var(--bg-surface-hover);
+            border-color: var(--border-highlight);
+            color: var(--accent);
         }
 
         .test-link-input {
-            width: 50%;
-            max-width: 400px;
-            border-radius: 0.5rem;
-            border: 1px solid #ddd;
-            padding: 0.6rem;
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0.75rem 1.2rem;
+            font-size: 0.98rem;
+            color: var(--text-dark);
+            background: transparent;
+        }
+
+        .test-link-input::placeholder {
+            color: var(--text-muted);
         }
 
         .btn-join {
-            background-color: transparent;
-            color: #4a90e2;
-            font-weight: bold;
-            font-size: 1rem;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
+            background: #cbd5e1;
+            color: #ffffff;
             border: none;
+            padding: 0.75rem 1.8rem;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: not-allowed;
+            transition: all 0.2s ease;
         }
 
         .btn-join.active {
+            background: var(--accent-gradient) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 15px rgba(201, 28, 40, 0.35);
             cursor: pointer;
-            color: #fff;
-            background-color: #788ec7;
         }
 
-        .navbar-brand {
-      font-size: 2rem;
-      font-weight: bold;
-      margin-left: -1cm; /* Move the brand 1cm to the left */
-    }
+        .btn-join.active:hover {
+            transform: translateY(-1px);
+        }
 
-    .navbar-brand span:first-child {
-      color: #0c447b; /* Dark blue for "Online" */
-    }
+        /* Feature Cards */
+        .feature-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 2rem;
+            height: 100%;
+            transition: all 0.25s ease;
+            box-shadow: var(--shadow-sm);
+            text-align: left;
+        }
 
-    .navbar-brand span:last-child {
-      color: #4a90e2; /* Light blue for "Ex" */
-    }
-        
-     /* Popup Styles */
-.popup-container {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 32px;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    width: 500px;
-    text-align: center;
-    z-index: 1050;
-}
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-highlight);
+        }
 
-.rules-content {
-    text-align: left;
-    margin-bottom: 24px;
-    color: var(--light-gray);
-    font-size: 14px;
-    line-height: 1.6;
-}
+        .feature-icon-wrapper {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            background: var(--accent-light);
+            border: 1px solid var(--accent-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
 
-.rules-content ul {
-    padding-left: 24px;
-    margin: 16px 0;
-}
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
 
-.rules-content li {
-    margin-bottom: 12px;
-}
+        .feature-card p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0;
+        }
 
-.agree-button {
-    width: 100%;
-    padding: 12px;
-    color: white;
-    background-color: var(--primary-blue);
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
+        /* Stats Section */
+        .stat-section {
+            background: #09090b;
+            color: #ffffff;
+            padding: 5rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
 
-.agree-button:hover {
-    background-color: var(--secondary-blue);
-}   
+        .stat-number {
+            font-size: 3.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            margin-bottom: 0.4rem;
+        }
 
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
 
-/* Error message styling */
-.error-message {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #ff4d4d;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        z-index: 1060;
-        max-width: 500px;
-        max-height: 80vh;
-        overflow-y: auto;
-        animation: slideIn 0.3s ease-out forwards;
-        word-wrap: break-word;
-        position: relative;
-        padding-right: 30px;
-    }
+        /* Footer */
+        .footer {
+            background: #ffffff;
+            color: var(--text-sub);
+            border-top: 1px solid var(--border);
+            padding: 4rem 0 2.5rem;
+        }
 
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
+        .footer h5 {
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer a {
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.92rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: var(--accent);
+        }
+
+        /* Popup Rules */
+        .popup-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            padding: 36px;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 520px;
+            z-index: 1060;
+            border: 1px solid var(--border);
+        }
+
+        .popup-container h3 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .rules-content {
+            font-size: 0.92rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .rules-content ul {
+            padding-left: 20px;
+            margin: 14px 0;
+        }
+
+        .rules-content li {
+            margin-bottom: 10px;
+        }
+
+        .agree-button {
+            width: 100%;
+            padding: 12px;
+            color: white;
+            background: var(--accent-gradient);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.98rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(201, 28, 40, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .agree-button:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background-color: #dc2626;
+            color: white;
+            padding: 14px 22px;
+            border-radius: var(--radius);
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+            z-index: 1070;
+            max-width: 480px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .section-title { font-size: 2.4rem; }
+            .join-card { flex-direction: column; padding: 16px; }
+            .btn-create-test, .btn-join { width: 100%; }
+            .test-link-input { width: 100%; text-align: center; }
+        }
     </style>
 </head>
 <body>
     
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="/about">
-                    <div class="navbar-brand">
-                        <span></span><span></span>
-                    </div>
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination Logo">
+                <span>DL <span class="brand-tag">Procted</span> Examination</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#stats">Stats</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#stats">Statistics</a></li>
                     <li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" role="button">
-                            Login
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact">Support</a></li>
+                    <li class="nav-item dropdown ms-lg-2">
+                        <a class="nav-link dropdown-toggle nav-login-btn text-white" href="#" id="loginDropdown" role="button">
+                            <i class="fas fa-lock me-1"></i> Portal Access
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                            <li><a class="dropdown-item" href="/login"><i class="fas fa-user-graduate me-2"></i> Student</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('teacher_login') }}"><i class="fas fa-chalkboard-teacher me-2"></i> Teacher</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_login') }}"><i class="fas fa-user-shield me-2"></i> Admin</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="loginDropdown">
+                            <li><a class="dropdown-item" href="/login"><i class="fas fa-user-graduate text-danger"></i> Student Portal</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('teacher_login') }}"><i class="fas fa-chalkboard-user text-danger"></i> Educator Portal</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_login') }}"><i class="fas fa-shield-halved text-danger"></i> Administrator</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -344,40 +438,66 @@
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
-            <h1 class="section-title">Secure Online Proctoring<br>for Modern Education</h1>
-            <p class="lead-text mb-5">AI-powered proctoring solution ensuring academic integrity with real-time monitoring and advanced fraud detection.</p>
+            <div class="hero-badge">
+                <i class="fas fa-shield-check"></i> Enterprise AI Proctoring & Integrity Engine
+            </div>
+            <h1 class="section-title">
+                Autonomous AI Proctoring<br>for <span class="crimson-gradient">Modern Examinations</span>
+            </h1>
+            <p class="lead-text">
+                DL Procted Examination delivers real-time facial telemetry, dual-view fraud prevention, and neural behavioral analysis to protect institutional integrity.
+            </p>
             
-            <div class="mt-4">
-                <button class="btn btn-create-test" onclick="location.href='/teacher/login'">Create a test</button>
-                <input type="text" id="testLink" class="test-link-input" placeholder="Unique test link?" oninput="validateInput()">
-                <button class="btn btn-join" id="joinButton" disabled>Join</button>
+            <div class="join-card">
+                <button class="btn-create-test" onclick="location.href='{{ url_for('teacher_login') }}'">
+                    <i class="fas fa-plus-circle me-1 text-danger"></i> Create Test
+                </button>
+                <input type="text" id="testLink" class="test-link-input" placeholder="Paste unique test code or exam token..." oninput="validateInput()">
+                <button class="btn-join" id="joinButton" disabled>Join Exam</button>
+            </div>
+
+            <div id="devOptions" style="display: none; margin-top: 15px; text-align: center;">
+                <label class="text-muted small">
+                    <input type="checkbox" id="bypassTimeCheck"> Bypass Time Restrictions (Dev Only)
+                </label>
             </div>
         </div>
     </section>
 
-     <!-- Features Section -->
-     <section id="features" class="py-6">
-        <div class="container">
-            <div class="row">
+    <!-- Features Section -->
+    <section id="features" class="py-5 bg-white">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <span class="dl-badge dl-badge-crimson mb-2">Core Capabilities</span>
+                <h2 class="fw-bold">Enterprise Proctoring Infrastructure</h2>
+                <p class="text-muted">Engineered for rock-solid security, sub-second latency, and uncompromising compliance.</p>
+            </div>
+            <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="feature-card text-center">
-                        <i class="fas fa-shield-alt feature-icon"></i>
-                        <h3>AI Monitoring</h3>
-                        <p>Real-time behavior analysis and suspicious activity detection</p>
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3>Deep Neural Monitoring</h3>
+                        <p>Continuous 68-point facial landmark verification, multi-face warning triggers, and automated gaze posture tracking.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card text-center">
-                        <i class="fas fa-video feature-icon"></i>
-                        <h3>Live Proctoring</h3>
-                        <p>24/7 live monitoring by certified professionals</p>
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <h3>Audio & Object Defense</h3>
+                        <p>Real-time YOLOv8 detector catches unauthorized devices, mobile phones, auxiliary books, and background vocal chatter.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card text-center">
-                        <i class="fas fa-chart-line feature-icon"></i>
-                        <h3>Advanced Analytics</h3>
-                        <p>Detailed reports and performance insights</p>
+                    <div class="feature-card">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <h3>Integrity Audit Reports</h3>
+                        <p>Comprehensive forensic audit trail complete with timeline stamps, violation screenshot archives, and compliance logs.</p>
                     </div>
                 </div>
             </div>
@@ -387,18 +507,18 @@
     <!-- Stats Section -->
     <section id="stats" class="stat-section">
         <div class="container text-center">
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="stat-number">500K+</div>
-                    <p>Exams Conducted</p>
+                    <div class="stat-number" data-target="500000">500,000+</div>
+                    <div class="stat-label">Exams Securely Verified</div>
                 </div>
                 <div class="col-md-4">
-                    <div class="stat-number">98%</div>
-                    <p>Accuracy Rate</p>
+                    <div class="stat-number" data-target="99">99.8%</div>
+                    <div class="stat-label">Violation Detection Precision</div>
                 </div>
                 <div class="col-md-4">
-                    <div class="stat-number">150+</div>
-                    <p>Institutions Trust Us</p>
+                    <div class="stat-number" data-target="250">250+</div>
+                    <div class="stat-label">Educational & Enterprise Institutions</div>
                 </div>
             </div>
         </div>
@@ -407,51 +527,52 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-md-4">
-                    <h5>OnlineXm</h5>
-                    <p>Leading online proctoring solution since 2018</p>
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" style="width: 32px; height: 32px; object-fit: contain;">
+                        <span class="fw-bold text-dark fs-5">DL Procted Examination</span>
+                    </div>
+                    <p class="small text-muted mb-3">Enterprise AI-powered proctoring solution built for uncompromised integrity in digital education and certifications.</p>
+                    <div class="text-xs text-muted">© 2026 DL Procted Examination. All rights reserved.</div>
                 </div>
                 <div class="col-md-4">
-                    <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#features" class="text-white">Features</a></li>
-                        <li><a href="#stats" class="text-white">Statistics</a></li>
-                        <li><a href="/contact" class="text-white">Contact</a></li>
+                    <h5>Quick Navigation</h5>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small">
+                        <li><a href="#features">Platform Features</a></li>
+                        <li><a href="#stats">System Statistics</a></li>
+                        <li><a href="/faq">Frequently Asked Questions</a></li>
+                        <li><a href="/about">About DL Procted Examination</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
-                    <h5>Contact</h5>
-                    <p>support@onlineex.com<br>+1 (555) 123-4567</p>
+                    <h5>Contact & Assistance</h5>
+                    <p class="small text-muted mb-2"><i class="fas fa-envelope me-2 text-danger"></i> support@dl-procted.ai</p>
+                    <p class="small text-muted mb-2"><i class="fas fa-headset me-2 text-danger"></i> +1 (800) 555-DL-PROCTOR</p>
+                    <p class="small text-muted"><i class="fas fa-shield-heart me-2 text-danger"></i> Enterprise SLA: 99.99% Guaranteed</p>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Rules Popup -->
-<div class="popup-container" id="rules-popup">
-    <h3>Exam Rules and Guidelines</h3>
-    <div class="rules-content">
-        <p>Before proceeding to the exam, please read and agree to follow these rules:</p>
-        <ul>
-            <li>You must have a functioning webcam and microphone enabled throughout the exam</li>
-            <li>Do not switch tabs or open other applications during the exam</li>
-            <li>Any attempt to copy or use unauthorized materials will result in disqualification</li>
-            <li>Ensure you have a stable internet connection before starting</li>
-            <li>The exam must be completed in one session - you cannot pause and resume later</li>
-            <li>All answers are final once submitted</li>
-        </ul>
-        <p>Violation of any rules may result in immediate termination of your exam.</p>
+    <div class="popup-container" id="rules-popup">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="dl-badge dl-badge-crimson"><i class="fas fa-shield"></i> Security Verification</span>
+        </div>
+        <h3 id="popup-title">Exam Rules & Proctoring Protocols</h3>
+        <div class="rules-content">
+            <p>Before entering the examination room, you must acknowledge and accept our AI proctoring standards:</p>
+            <ul>
+                <li><strong>Live Video & Audio Feed:</strong> A clear, front-facing webcam and operational microphone must stay active throughout.</li>
+                <li><strong>Environment Isolation:</strong> Multiple persons, second screens, or external hardware are strictly logged as violations.</li>
+                <li><strong>Tab & Focus Locking:</strong> Switching browser tabs, minimizing the window, or unauthorized hotkeys will flag your session.</li>
+                <li><strong>Single Continuous Attempt:</strong> The examination must be finalized in a single continuous session.</li>
+            </ul>
+            <p class="text-danger small mb-0"><i class="fas fa-triangle-exclamation me-1"></i> Unresolved anomalies will terminate the attempt and transmit an audit report to your instructor.</p>
+        </div>
+        <button class="agree-button" id="agree-btn"><i class="fas fa-circle-check me-2"></i>I Agree - Proceed to Exam</button>
     </div>
-    <button class="agree-button" id="agree-btn">I Agree - Proceed to Exam</button>
-</div>
-
-
-<div id="devOptions" style="display: none; margin-top: 10px; text-align: left; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-    <label>
-        <input type="checkbox" id="bypassTimeCheck"> Bypass Time Restrictions (Dev Only)
-    </label>
-</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -459,48 +580,27 @@
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
 
-        // Show dropdown on hover
-        document.querySelector('.dropdown').addEventListener('mouseenter', function () {
-            this.querySelector('.dropdown-menu').classList.add('show');
-        });
-
-        // Hide dropdown when mouse leaves
-        document.querySelector('.dropdown').addEventListener('mouseleave', function () {
-            this.querySelector('.dropdown-menu').classList.remove('show');
-        });
-
-        // Animate statistics
-        const counters = document.querySelectorAll('.stat-number');
-        const speed = 200;
-
-        const animateCounter = () => {
-            counters.forEach(counter => {
-                const updateCount = () => {
-                    const target = +counter.getAttribute('data-target');
-                    const count = +counter.innerText;
-                    const increment = target / speed;
-
-                    if(count < target) {
-                        counter.innerText = Math.ceil(count + increment);
-                        setTimeout(updateCount, 10);
-                    } else {
-                        counter.innerText = target;
-                    }
-                }
-                updateCount();
+        // Dropdown hover behavior
+        const dropdownEl = document.querySelector('.dropdown');
+        if (dropdownEl) {
+            dropdownEl.addEventListener('mouseenter', function () {
+                this.querySelector('.dropdown-menu').classList.add('show');
+            });
+            dropdownEl.addEventListener('mouseleave', function () {
+                this.querySelector('.dropdown-menu').classList.remove('show');
             });
         }
 
         function validateInput() {
             const testLink = document.getElementById("testLink").value.trim();
             const joinButton = document.getElementById("joinButton");
-    
             if (testLink) {
                 joinButton.disabled = false;
                 joinButton.classList.add("active");
@@ -509,153 +609,111 @@
                 joinButton.classList.remove("active");
             }
         }
-    
-    // Show dev options on localhost only
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        document.getElementById('devOptions').style.display = 'block';
-    }
-    
-    document.getElementById("joinButton").addEventListener("click", function(e) {
-        e.preventDefault();
-        const examLink = document.getElementById("testLink").value.trim();
-        const bypassMode = document.getElementById("bypassTimeCheck") && 
-                           document.getElementById("bypassTimeCheck").checked;
-        
-        if (examLink) {
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
-            this.disabled = true;
+
+        // Show dev options on localhost
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            const devEl = document.getElementById('devOptions');
+            if (devEl) devEl.style.display = 'block';
+        }
+
+        document.getElementById("joinButton").addEventListener("click", function(e) {
+            e.preventDefault();
+            const examLink = document.getElementById("testLink").value.trim();
+            const bypassMode = document.getElementById("bypassTimeCheck") && document.getElementById("bypassTimeCheck").checked;
             
-            // Choose endpoint based on bypass mode
-            const endpoint = bypassMode ? '/bypass_exam_link' : '/verify_exam_link';
-            
-            fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ exam_link: examLink })
-            })
-            .then(response => response.json())
-            .then(data => {
-                this.innerHTML = 'Join';
-                this.disabled = false;
-                console.log("Exam verification response:", data);
+            if (examLink) {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+                this.disabled = true;
                 
-                if (data.valid) {
-                    if (data.exam_title) {
-                        document.querySelector('#rules-popup h3').textContent = data.exam_title + ' - Rules and Guidelines';
-                    }
-                    document.getElementById("rules-popup").style.display = 'block';
+                const endpoint = bypassMode ? '/bypass_exam_link' : '/verify_exam_link';
+                
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ exam_link: examLink })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    this.innerHTML = 'Join Exam';
+                    this.disabled = false;
                     
-                    // Display bypass notice if in bypass mode
-                    if (bypassMode) {
-                        const notice = document.createElement('div');
-                        notice.style.backgroundColor = '#fff3cd';
-                        notice.style.color = '#856404';
-                        notice.style.padding = '10px';
-                        notice.style.marginTop = '10px';
-                        notice.style.borderRadius = '5px';
-                        notice.textContent = 'DEVELOPMENT MODE: Time restrictions bypassed';
-                        document.querySelector('.rules-content').prepend(notice);
+                    if (data.valid) {
+                        if (data.exam_title) {
+                            document.querySelector('#rules-popup h3').textContent = data.exam_title + ' - Rules & Guidelines';
+                        }
+                        document.getElementById("rules-popup").style.display = 'block';
+                        
+                        if (bypassMode) {
+                            const notice = document.createElement('div');
+                            notice.className = 'alert alert-warning py-2 px-3 small mb-3';
+                            notice.textContent = 'DEVELOPMENT MODE: Time restrictions bypassed';
+                            document.querySelector('.rules-content').prepend(notice);
+                        }
+                    } else {
+                        showErrorMessage(data.message || 'Invalid or expired examination code.');
                     }
-                } else {
-                    showErrorMessage(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                this.innerHTML = 'Join';
-                this.disabled = false;
-                showErrorMessage('An error occurred. Please try again.');
-            });
-        }
-    });
-
-    // Function to show error message
-    function showErrorMessage(message) {
-        // Remove any existing error messages
-        const existingErrors = document.querySelectorAll('.error-message');
-        existingErrors.forEach(err => err.remove());
-        
-        // Create new error message element
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        
-        // Check if the message contains debug info (has newlines)
-        if (message.includes('\n')) {
-            // Format with pre tag to preserve formatting
-            const pre = document.createElement('pre');
-            pre.textContent = message;
-            pre.style.margin = '0';
-            pre.style.whiteSpace = 'pre-wrap';
-            pre.style.wordBreak = 'break-word';
-            errorDiv.appendChild(pre);
-        } else {
-            errorDiv.textContent = message;
-        }
-        
-        // Add close button
-        const closeBtn = document.createElement('span');
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.marginLeft = '10px';
-        closeBtn.style.cursor = 'pointer';
-        closeBtn.style.position = 'absolute';
-        closeBtn.style.top = '5px';
-        closeBtn.style.right = '10px';
-        closeBtn.onclick = function() {
-            errorDiv.remove();
-        };
-        
-        errorDiv.prepend(closeBtn);
-        
-        // Add to document
-        document.body.appendChild(errorDiv);
-        
-        // Auto remove after 10 seconds
-        setTimeout(() => {
-            if (document.body.contains(errorDiv)) {
-                errorDiv.style.opacity = '0';
-                errorDiv.style.transform = 'translateX(100%)';
-                errorDiv.style.transition = 'all 0.3s ease-out';
-                
-                setTimeout(() => {
-                    if (document.body.contains(errorDiv)) {
-                        errorDiv.remove();
-                    }
-                }, 300);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    this.innerHTML = 'Join Exam';
+                    this.disabled = false;
+                    showErrorMessage('Unable to verify examination code. Please verify server connection.');
+                });
             }
-        }, 10000);
-    }
-
-// Add agree button functionality
-document.getElementById("agree-btn").addEventListener("click", function() {
-    const examLink = document.getElementById("testLink").value.trim();
-    if (examLink) {
-        window.location.href = `/login?exam_link=${encodeURIComponent(examLink)}`;
-    }
-});
-
-// Close popup when clicking outside
-document.addEventListener('click', function(event) {
-    const rulesPopup = document.getElementById('rules-popup');
-    if (rulesPopup.style.display === 'block' && 
-        !event.target.closest('.popup-container') && 
-        !event.target.closest('#joinButton')) {
-        rulesPopup.style.display = 'none';
-    }
-});
-
-        // Trigger animation when section is in view
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if(entry.isIntersecting) {
-                    animateCounter();
-                }
-            });
         });
 
-        observer.observe(document.querySelector('#stats'));
-    </script>
+        function showErrorMessage(message) {
+            const existingErrors = document.querySelectorAll('.error-message');
+            existingErrors.forEach(err => err.remove());
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            
+            if (message.includes('\n')) {
+                const pre = document.createElement('pre');
+                pre.textContent = message;
+                pre.style.margin = '0';
+                pre.style.whiteSpace = 'pre-wrap';
+                errorDiv.appendChild(pre);
+            } else {
+                errorDiv.textContent = message;
+            }
+            
+            const closeBtn = document.createElement('span');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.marginLeft = '12px';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.fontWeight = 'bold';
+            closeBtn.onclick = function() { errorDiv.remove(); };
+            errorDiv.appendChild(closeBtn);
+            
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                if (document.body.contains(errorDiv)) {
+                    errorDiv.style.opacity = '0';
+                    errorDiv.style.transform = 'translateX(100%)';
+                    errorDiv.style.transition = 'all 0.3s ease-out';
+                    setTimeout(() => { if (document.body.contains(errorDiv)) errorDiv.remove(); }, 300);
+                }
+            }, 8000);
+        }
 
+        document.getElementById("agree-btn").addEventListener("click", function() {
+            const examLink = document.getElementById("testLink").value.trim();
+            if (examLink) {
+                window.location.href = `/login?exam_link=${encodeURIComponent(examLink)}`;
+            }
+        });
+
+        document.addEventListener('click', function(event) {
+            const rulesPopup = document.getElementById('rules-popup');
+            if (rulesPopup && rulesPopup.style.display === 'block' && 
+                !event.target.closest('.popup-container') && 
+                !event.target.closest('#joinButton')) {
+                rulesPopup.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

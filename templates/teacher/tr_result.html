@@ -4,361 +4,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Exam Results | DL Procted Examination</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
-        :root {
-            --primary-blue: #1a365d;
-            --accent-blue: #4299e1;
-            --light-bg: #f8fafc;
-            --text-dark: #2d3748;
-            --text-light: #718096;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
-        }
-
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light-bg);
+            font-family: var(--font-sans);
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
         }
 
         .sidebar {
-            width: 280px;
+            width: 270px;
             background-color: #ffffff;
             height: 100vh;
             position: fixed;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #e2e8f0;
-            padding-top: 30px;
+            border-right: 1px solid var(--border);
+            padding-top: 20px;
+            box-shadow: 1px 0 10px rgba(0,0,0,0.02);
+            z-index: 100;
         }
 
-        .navbar-brand {
-            font-size: 1.75rem;
-            font-weight: 700;
-            padding: 0 24px;
-            margin-bottom: 40px;
-        }
-
-        .navbar-brand span:first-child {
-            color: var(--primary-blue);
-        }
-
-        .navbar-brand span:last-child {
-            color: var(--accent-blue);
+        .brand-section {
+            padding: 0 20px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 18px;
         }
 
         .profile {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
             padding: 0 20px;
         }
 
-        .profile img {
-            width: 96px;
-            height: 96px;
+        .profile img, .profile .avatar-placeholder {
+            width: 86px;
+            height: 86px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #e2e8f0;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s ease;
         }
 
         .profile h3 {
-            margin: 16px 0 0;
-            font-size: 1.25rem;
-            color: var(--text-dark);
-            font-weight: 600;
+            margin: 12px 0 2px;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .profile .role-badge {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--accent);
+            background: var(--accent-light);
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--accent-border);
         }
 
         .menu {
-            padding: 0 16px;
+            padding: 0 14px;
+            flex: 1;
+            overflow-y: auto;
         }
 
         .menu-item {
-            padding: 14px 20px;
-            font-size: 15px;
-            color: var(--text-light);
+            padding: 11px 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
             text-decoration: none;
             display: flex;
             align-items: center;
-            border-radius: 8px;
+            border-radius: var(--radius);
             margin: 4px 0;
             transition: all 0.2s ease;
+            font-weight: 500;
         }
 
-        .menu-item:hover,
+        .menu-item:hover {
+            background-color: var(--bg-surface-hover);
+            color: var(--accent);
+        }
+
         .menu-item.active {
-            background-color: #ebf8ff;
-            color: var(--primary-blue);
-            font-weight: 600;
+            background-color: var(--accent-light);
+            color: var(--accent);
+            font-weight: 700;
         }
 
         .menu-item .icon {
             font-size: 1.1rem;
             margin-right: 12px;
-            width: 24px;
+            width: 22px;
+            text-align: center;
         }
 
         .content {
-            margin-left: 280px;
+            margin-left: 270px;
             padding: 32px 40px;
+            min-height: 100vh;
         }
 
-        .navbar {
+        .header-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            position: relative;
+            margin-bottom: 24px;
         }
 
-        .navbar h2 {
+        .header-bar h2 {
             margin: 0;
-            font-size: 24px;
-            font-weight: 600;
-            color: #2b2b2b;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
         }
 
         .search-container {
-            position: relative;
             display: flex;
             align-items: center;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 14px;
+            width: 320px;
+            transition: all 0.2s ease;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
         .search-icon {
-            font-size: 18px;
-            color: black;
-            cursor: pointer;
+            color: var(--text-muted);
+            margin-right: 10px;
+            font-size: 14px;
         }
 
-        .search-field {
-            position: absolute;
-            right: 40px;
-            top: 0;
-            display: none;
-            flex-direction: row;
-            align-items: center;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 5px 15px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-field input {
+        .search-container input {
             border: none;
             outline: none;
-            padding: 5px;
-            font-size: 14px;
-            width: 200px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            width: 100%;
+            background: transparent;
         }
 
-        .menu-icon {
-            font-size: 18px;
-            color: black;
+        .close-search {
+            color: var(--text-muted);
             cursor: pointer;
-            margin-left: 20px;
-        }
-
-        .menu-items {
-            position: absolute;
-            top: 30px;
-            right: 0;
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            display: none;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .menu-items a {
-            padding: 10px 15px;
-            text-decoration: none;
-            color: #2b2b2b;
             font-size: 14px;
-            display: block;
-            transition: background-color 0.3s ease;
+            display: none;
         }
 
-        .menu-items a:hover {
-            background-color: #f0f5ff;
+        .close-search:hover {
+            color: var(--text-primary);
+        }
+
+        .table-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
         }
 
         .result-table {
             width: 100%;
-            border-collapse: collapse;
-            background-color: #ffffff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         .result-table th,
         .result-table td {
-            padding: 12px 15px;
+            padding: 16px 20px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.9rem;
         }
 
         .result-table th {
-            background-color: #f0f5ff;
-            font-weight: 600;
-            color: #4a90e2;
+            background-color: var(--bg-canvas);
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .result-table tr:hover {
-            background-color: #f9fbff;
+        .result-table tbody tr {
+            transition: background-color 0.15s ease;
         }
 
-        .result-table td {
-            font-size: 14px;
-            color: #2b2b2b;
+        .result-table tbody tr:hover {
+            background-color: #fafbfc;
         }
 
         .result-table tr:last-child td {
             border-bottom: none;
         }
-        
-        .delete-btn {
-            color: #e53e3e;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
+
+        .student-link {
+            color: var(--text-primary);
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.15s;
         }
-        
-        .delete-btn:hover {
-            background-color: #fff5f5;
+
+        .student-link:hover {
+            color: var(--accent);
         }
-        
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-passed {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .badge-failed {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .badge-pending {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+
+        .score-pill {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
         .no-results {
             text-align: center;
-            padding: 20px;
-            color: #718096;
-            font-style: italic;
+            padding: 50px 20px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
         }
     </style>
 </head>
 
 <body>
+    <!-- Sidebar -->
     <div class="sidebar">
-        <div class="navbar-brand">
-            <span></span><span></span>
+        <div class="brand-section">
+            <a href="/teacher/trdash" class="dl-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+                <div class="dl-brand-text">
+                    <span class="dl-brand-title">DL <span class="crimson">Procted</span></span>
+                    <span class="dl-brand-subtitle">Examination</span>
+                </div>
+            </a>
         </div>
         
         <div class="profile">
-    <a href="{{ url_for('teacher_edit_profile') }}">
-        {% if profile_image %}
-            <img src="data:image/jpeg;base64,{{ profile_image }}" alt="Profile">
-        {% else %}
-            <img src="https://via.placeholder.com/96" alt="Profile">
-        {% endif %}
-    </a>
-    <h3>{{ fullname }}</h3>
-</div>
+            <a href="{{ url_for('teacher_edit_profile') }}">
+                {% if profile_image %}
+                    <img src="data:image/jpeg;base64,{{ profile_image }}" alt="Profile Photo">
+                {% else %}
+                    <div class="avatar-placeholder" style="display:inline-flex; align-items:center; justify-content:center; background:var(--accent-gradient); color:#fff; font-size:1.8rem; font-weight:700;">
+                        {{ fullname[0]|upper if fullname else 'F' }}
+                    </div>
+                {% endif %}
+            </a>
+            <h3>{{ fullname }}</h3>
+            <span class="role-badge">Faculty Instructor</span>
+        </div>
 
         <div class="menu">
             <a href="/teacher/trdash" class="menu-item">
-                <span class="icon"><i class="fas fa-tachometer-alt"></i></span>Dashboard
+                <span class="icon"><i class="fas fa-chart-line"></i></span>Dashboard
             </a>
             <a href="/teacher/tr_createxm" class="menu-item">
-                <span class="icon"><i class="fas fa-pencil-alt"></i></span>Create Exam
+                <span class="icon"><i class="fas fa-file-circle-plus"></i></span>Create Exam
             </a>
             <a href="/teacher/tr_result" class="menu-item active">
-                <span class="icon"><i class="fas fa-chart-bar"></i></span>Results
+                <span class="icon"><i class="fas fa-clipboard-check"></i></span>Results
             </a>
             <a href="{{ url_for('change1_password') }}" class="menu-item">
-                <span class="icon"><i class="fas fa-lock"></i></span>Password Change
+                <span class="icon"><i class="fas fa-key"></i></span>Password Change
             </a>
             <a href="/teacher/tr_complaint" class="menu-item">
-                <span class="icon"><i class="fas fa-comment-dots"></i></span>Support Center
+                <span class="icon"><i class="fas fa-headset"></i></span>Support Center
             </a>
             <a href="/logout" class="menu-item">
-                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>Logout
+                <span class="icon"><i class="fas fa-right-from-bracket"></i></span>Logout
             </a>
         </div>
     </div>
 
+    <!-- Main Content -->
     <div class="content">
-        <div class="navbar">
-            <h2>Exam Results</h2>
+        <div class="header-bar">
+            <div>
+                <h2>Candidate Assessment Records</h2>
+                <p style="margin: 4px 0 0; color: var(--text-secondary); font-size: 0.92rem;">Review candidate answers, grading status, and performance metrics.</p>
+            </div>
 
             <div class="search-container">
                 <i class="fas fa-search search-icon" id="search-icon"></i>
-                <div class="search-field" id="search-field">
-                    <input type="text" id="search-input" placeholder="Search by student or exam...">
-                    <i class="fas fa-times close-search" id="close-search" style="margin-left: 10px; cursor: pointer;"></i>
-                </div>
+                <input type="text" id="search-input" placeholder="Search candidate or exam title...">
+                <i class="fas fa-times close-search" id="close-search"></i>
             </div>
         </div>
 
-        <table class="result-table">
-            <thead>
-                <tr>
-                    <th>Student Name</th>
-                    <th>Date</th>
-                    <th>Exam</th>
-                    <th>Score</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="result-body">
-                {% if results %}
-                    {% for result in results %}
-                    <tr class="result-row">
-                        <td><a href="{{ url_for('student_answers', answer_id=result.answer_id) }}">{{ result.fullname }}</a></td>
-                        <td>{{ result.submitted_at.strftime('%Y-%m-%d %H:%M') if result.submitted_at and result.submitted_at.strftime else (result.submitted_at or '') }}</td>
-                        <td>{{ result.exam_title }}</td>
-                        <td>{{ result.score }}</td>
-                        <td>
-                            {% if result.status == 'passed' %}
-                                <span style="color: green;">{{ result.status }}</span>
-                            {% elif result.status == 'failed' %}
-                                <span style="color: red;">{{ result.status }}</span>
-                            {% else %}
-                                {{ result.status }}
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
+        <div class="table-card">
+            <table class="result-table">
+                <thead>
                     <tr>
-                        <td colspan="6" class="no-results">No results available.</td>
+                        <th>Candidate Name</th>
+                        <th>Submission Date</th>
+                        <th>Exam Title</th>
+                        <th>Score</th>
+                        <th>Status</th>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody id="result-body">
+                    {% if results %}
+                        {% for result in results %}
+                        <tr class="result-row">
+                            <td>
+                                <a href="{{ url_for('student_answers', answer_id=result.answer_id) }}" class="student-link">
+                                    <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.8rem; color: var(--accent);"></i>
+                                    {{ result.fullname }}
+                                </a>
+                            </td>
+                            <td>{{ result.submitted_at.strftime('%Y-%m-%d %H:%M') if result.submitted_at and result.submitted_at.strftime else (result.submitted_at or '') }}</td>
+                            <td><strong>{{ result.exam_title }}</strong></td>
+                            <td><span class="score-pill">{{ result.score }}</span></td>
+                            <td>
+                                {% if result.status == 'passed' %}
+                                    <span class="badge-status badge-passed"><i class="fas fa-check"></i> Passed</span>
+                                {% elif result.status == 'failed' %}
+                                    <span class="badge-status badge-failed"><i class="fas fa-times"></i> Failed</span>
+                                {% else %}
+                                    <span class="badge-status badge-pending">{{ result.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="no-results">
+                                <i class="fas fa-inbox fa-2x" style="margin-bottom: 10px; display: block; opacity: 0.5;"></i>
+                                No candidate assessment records available.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // Search functionality
-        const searchIcon = document.getElementById('search-icon');
-        const searchField = document.getElementById('search-field');
         const searchInput = document.getElementById('search-input');
         const closeSearch = document.getElementById('close-search');
-        const menuIcon = document.getElementById('menu-icon');
-        const menuItems = document.getElementById('menu-items');
         const resultRows = document.querySelectorAll('.result-row');
-        const deleteButtons = document.querySelectorAll('.delete-btn');
-        const deleteAllBtn = document.querySelector('.delete-all-btn');
 
-        // Toggle search field
-        searchIcon.addEventListener('click', () => {
-            searchField.style.display = 'flex';
-            searchInput.focus();
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            closeSearch.style.display = query ? 'inline-block' : 'none';
+            filterResults(query);
         });
 
         closeSearch.addEventListener('click', () => {
-            searchField.style.display = 'none';
             searchInput.value = '';
+            closeSearch.style.display = 'none';
             filterResults('');
-        });
-
-        // Search functionality
-        searchInput.addEventListener('input', (e) => {
-            filterResults(e.target.value.toLowerCase());
         });
 
         function filterResults(searchTerm) {
@@ -376,31 +421,19 @@
                 }
             });
             
-            // Show no results message if no matches
-            const noResultsRow = document.querySelector('.no-results');
+            const noResultsRow = document.querySelector('.no-results-dynamic');
             if (!hasResults && resultRows.length > 0) {
                 if (!noResultsRow) {
                     const tbody = document.getElementById('result-body');
                     const tr = document.createElement('tr');
-                    tr.innerHTML = '<td colspan="6" class="no-results">No matching results found.</td>';
+                    tr.className = 'no-results-dynamic';
+                    tr.innerHTML = '<td colspan="5" class="no-results">No candidate results match "' + searchTerm + '"</td>';
                     tbody.appendChild(tr);
                 }
-            } else if (noResultsRow && searchTerm === '') {
+            } else if (noResultsRow) {
                 noResultsRow.remove();
             }
         }
-
-        // Toggle menu items
-        menuIcon.addEventListener('click', () => {
-            menuItems.style.display = menuItems.style.display === 'flex' ? 'none' : 'flex';
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!menuIcon.contains(e.target) && !menuItems.contains(e.target)) {
-                menuItems.style.display = 'none';
-            }
-        });
 
         // Logout confirmation
         document.querySelectorAll('.menu-item').forEach(item => {

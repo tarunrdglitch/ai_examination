@@ -3,50 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnlineEx - Exam Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Identity Verification & Setup | DL Procted Examination</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
         :root {
-            --primary-color: #0066cc;
-            --secondary-color: #004999;
-            --success-color: #10B981;
-            --error-color: #EF4444;
-            --background-color: #F3F4F6;
-            --card-background: #FFFFFF;
-            --text-primary: #1F2937;
-            --text-secondary: #4B5563;
-            --border-radius: 12px;
-            --transition-speed: 0.3s;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --primary-accent: #c91c28;
+            --primary-hover: #b91c1c;
         }
 
         body {
             margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--background-color);
+            font-family: var(--font-sans);
+            background-color: var(--bg-canvas);
             color: var(--text-primary);
-            line-height: 1.5;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            line-height: 1.6;
         }
 
         .navbar {
-            background-color: var(--card-background);
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            background-color: #ffffff;
+            padding: 0.9rem 2rem;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: var(--shadow-xs);
         }
 
         .navbar-content {
@@ -57,62 +41,66 @@
             align-items: center;
         }
 
-        .navbar-brand {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-left: -1cm; /* Move the brand 1cm to the left */
-        }
-
-        .navbar-brand span:first-child {
-            color: #0c447b; /* Dark blue for "Online" */
-        }
-
-        .navbar-brand span:last-child {
-            color: #4a90e2; /* Light blue for "Ex" */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
         }
 
         .exam-card {
-            background-color: var(--card-background);
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            padding: 2rem;
-            margin-top: 2rem;
+            background-color: #ffffff;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .exam-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #E5E7EB;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .exam-title {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.6rem;
+            font-weight: 800;
             color: var(--text-primary);
-            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+            margin: 0;
         }
 
         .exam-info {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+            gap: 1.25rem;
             margin-bottom: 2rem;
         }
 
         .info-item {
-            padding: 1rem;
-            background-color: #F9FAFB;
-            border-radius: 8px;
+            padding: 1.1rem 1.25rem;
+            background-color: var(--bg-canvas);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-subtle);
         }
 
         .info-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
         }
 
         .info-value {
-            font-weight: 500;
+            font-weight: 700;
+            font-size: 1.05rem;
             color: var(--text-primary);
         }
 
@@ -120,43 +108,72 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 1.75rem;
+            margin-bottom: 1.5rem;
             width: 100%;
         }
-        
+
+        .face-guidelines {
+            background-color: var(--accent-light);
+            border: 1px solid var(--accent-border);
+            border-radius: var(--radius-lg);
+            padding: 1.4rem 1.6rem;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        .face-guidelines h3 {
+            color: var(--accent);
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0 0 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .face-guidelines ul {
+            margin: 0;
+            padding-left: 1.4rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
         .main-camera-container {
             width: 100%;
-            max-width: 640px;
-            margin-bottom: 1rem;
+            max-width: 680px;
         }
 
         .main-camera-label {
-            font-weight: 500;
+            font-weight: 700;
+            font-size: 0.88rem;
             color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            text-align: center;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         #main-webcam {
             width: 100%;
-            height: 480px;
-            border-radius: var(--border-radius);
-            background-color: #F9FAFB;
-            border: 2px solid #E5E7EB;
+            height: 440px;
+            border-radius: var(--radius-lg);
+            background-color: #09090b;
+            border: 2px solid var(--border);
             object-fit: cover;
+            box-shadow: var(--shadow-md);
         }
 
         .capture-container {
             display: flex;
             justify-content: center;
             width: 100%;
-            max-width: 640px;
-            margin-bottom: 1rem;
+            max-width: 680px;
         }
 
         .capture-box {
-            flex: 1;
+            width: 100%;
             max-width: 320px;
             display: flex;
             flex-direction: column;
@@ -164,100 +181,126 @@
             cursor: pointer;
         }
 
-        .capture-box:hover .capture-preview {
-            border-color: var(--primary-color);
-        }
-
         .capture-label {
-            font-weight: 500;
+            font-weight: 700;
+            font-size: 0.88rem;
             color: var(--text-secondary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
             text-align: center;
         }
 
         .capture-preview {
             width: 100%;
-            height: 240px;
-            border-radius: var(--border-radius);
-            background-color: #F9FAFB;
-            border: 2px dashed #E5E7EB;
+            height: 220px;
+            border-radius: var(--radius-lg);
+            background-color: var(--bg-canvas);
+            border: 2px dashed var(--border-highlight);
             object-fit: cover;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .capture-box:hover .capture-preview {
+            border-color: var(--accent);
+            background-color: var(--accent-light);
         }
 
         .capture-preview-placeholder {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-size: 0.88rem;
             text-align: center;
         }
 
+        .camera-icon {
+            font-size: 2rem;
+            margin-bottom: 6px;
+            color: var(--accent);
+        }
+
         .face-quality-indicator {
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
+            margin-top: 0.75rem;
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-weight: 600;
             text-align: center;
+            width: 100%;
             display: none;
         }
 
         .face-quality-good {
-            background-color: #ECFDF5;
-            color: #065F46;
+            background-color: var(--success-bg);
+            color: #065f46;
+            border: 1px solid var(--success-border);
         }
 
         .face-quality-bad {
-            background-color: #FEF2F2;
-            color: #991B1B;
+            background-color: var(--error-bg);
+            color: #991b1b;
+            border: 1px solid var(--error-border);
         }
 
         .button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 1rem;
-            transition: all var(--transition-speed);
+            padding: 0.85rem 1.6rem;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 0.96rem;
+            transition: all 0.2s ease;
             cursor: pointer;
             border: none;
             width: 100%;
             max-width: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .button-primary {
-            background-color: #1a365d;
+            background: var(--accent-gradient);
             color: white;
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 14px rgba(201, 28, 40, 0.28);
         }
 
         .button-primary:hover:not(:disabled) {
-            background-color: #4299e1;
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
             transform: translateY(-1px);
+            box-shadow: var(--shadow-crimson);
         }
 
         .button-success {
-            background-color: var(--success-color);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
             color: white;
+            border: 1px solid #059669;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
         }
 
         .button-success:hover:not(:disabled) {
-            filter: brightness(90%);
+            background: #047857;
             transform: translateY(-1px);
         }
 
         .button:disabled {
-            background-color: #E5E7EB;
+            background: #e2e8f0;
+            color: #94a3b8;
+            border-color: #e2e8f0;
             cursor: not-allowed;
-            color: #9CA3AF;
+            box-shadow: none;
         }
 
         #camera-error {
-            color: var(--error-color);
-            font-size: 0.875rem;
+            color: var(--error);
+            font-size: 0.9rem;
+            font-weight: 600;
             text-align: center;
-            padding: 0.75rem;
-            background-color: #FEF2F2;
-            border-radius: 8px;
+            padding: 0.9rem;
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            border-radius: var(--radius);
             margin-top: 1rem;
             display: none;
         }
@@ -267,122 +310,69 @@
             bottom: 2rem;
             right: 2rem;
             padding: 1rem 1.5rem;
-            border-radius: 8px;
+            border-radius: var(--radius);
             animation: slideIn 0.3s ease-out;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            max-width: 420px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            z-index: 2000;
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .notification.success {
-            background-color: #ECFDF5;
+            background-color: #ffffff;
             color: #065F46;
-            border-left: 4px solid var(--success-color);
+            border-left: 5px solid var(--success);
+            border: 1px solid var(--border);
+            border-left-width: 5px;
         }
 
         .notification.error {
-            background-color: #FEF2F2;
+            background-color: #ffffff;
             color: #991B1B;
-            border-left: 4px solid var(--error-color);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--error);
         }
 
         .notification.info {
-            background-color: #EFF6FF;
-            color: #1E40AF;
-            border-left: 4px solid var(--primary-color);
+            background-color: #ffffff;
+            color: var(--accent);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--accent);
         }
 
-        .camera-icon {
-            font-size: 2rem;
-            color: #9CA3AF;
-        }
-
-        .face-guidelines {
-            background-color: #EFF6FF;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            width: 100%;
-            max-width: 640px;
-        }
-
-        .face-guidelines h3 {
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .face-guidelines ul {
-            margin-left: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .exam-card {
-                padding: 1.5rem;
-            }
-
-            .exam-info {
-                grid-template-columns: 1fr;
-            }
-
-            .notification {
-                left: 1rem;
-                right: 1rem;
-                bottom: 1rem;
-            }
-        }
-        .back-button {
-            position: fixed;
-            bottom: 1rem;
-            left: 1rem;
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background-color var(--transition-speed);
-        }
-
-        .back-button:hover {
-            background-color: var(--primary-color);
-        }
         .back-to-home {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: left;
-            margin-top: 2rem;
-            color: #2c3e50;
-            text-decoration: none;
-            font-size: 1.2rem;
+            gap: 8px;
+            color: var(--text-secondary);
             font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
         }
-
-        .back-to-home i {
-            margin-right: 8px;
-            font-size: 1.5rem;
+        .back-to-home:hover {
+            color: var(--accent);
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="navbar-content">
-                <div class="navbar-brand">
-                    <span></span><span></span>
+            <a href="/studash" class="dl-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+                <div class="dl-brand-text">
+                    <span class="dl-brand-title">DL <span class="crimson">Procted</span></span>
+                    <span class="dl-brand-subtitle">Examination</span>
                 </div>
+            </a>
+            <div class="dl-badge dl-badge-crimson">
+                <i class="fas fa-video me-1"></i> Proctoring Setup Active
+            </div>
         </div>
     </nav>
 
@@ -390,266 +380,252 @@
         <div class="exam-card">
             <div class="exam-header">
                 <h1 class="exam-title">{{ exam_details.exam_title }}</h1>
+                <span class="dl-badge dl-badge-crimson">
+                    <i class="fas fa-clock me-1"></i> {{ exam_details.exam_duration }} Mins
+                </span>
             </div>
 
             <div class="exam-info">
                 <div class="info-item">
-                    <div class="info-label">Date</div>
+                    <div class="info-label">Session Date</div>
                     <div class="info-value">{{ exam_details.exam_date }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Time</div>
+                    <div class="info-label">Scheduled Time</div>
                     <div class="info-value">{{ exam_details.exam_time }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Duration</div>
+                    <div class="info-label">Total Duration</div>
                     <div class="info-value">{{ exam_details.exam_duration }} minutes</div>
                 </div>
             </div>
 
             <div class="info-item" style="margin-bottom: 2rem;">
-                <div class="info-label">Instructions</div>
-                <div class="info-value">{{ exam_details.exam_rules }}</div>
+                <div class="info-label">Exam Protocol & Instructions</div>
+                <div class="info-value" style="font-size: 0.95rem; font-weight: 500; color: var(--text-secondary); margin-top: 4px;">
+                    {{ exam_details.exam_rules }}
+                </div>
             </div>
 
             <div class="webcam-section">
                 <div class="face-guidelines">
-                    <h3>Face Verification Guidelines</h3>
+                    <h3><i class="fas fa-shield-halved"></i> Identity Verification Guidelines</h3>
                     <ul>
-                        <li>Ensure your face is clearly visible and well-lit</li>
-                        <li>Look directly at the camera (no side profiles)</li>
-                        <li>Keep your eyes open and visible</li>
-                        <li>Remove glasses, hats, or other face coverings</li>
-                        <li>Ensure your entire face is in the frame</li>
-                        <li>Maintain a neutral expression</li>
+                        <li>Sit in a well-illuminated room facing your camera directly.</li>
+                        <li>Keep both eyes, nose, and mouth completely uncovered and visible.</li>
+                        <li>Maintain a neutral expression without turning sideways or downward.</li>
+                        <li>Ensure no other individual is visible within the webcam frame.</li>
                     </ul>
                 </div>
                 
                 <div class="main-camera-container">
-                    <div class="main-camera-label">Webcam</div>
-                    <video id="main-webcam" autoplay></video>
+                    <div class="main-camera-label">
+                        <span><i class="fas fa-video text-danger me-1"></i> Live Hardware Webcam Feed</span>
+                        <span class="dl-badge dl-badge-success" style="font-size: 0.72rem;"><i class="fas fa-circle" style="font-size: 6px;"></i> Live</span>
+                    </div>
+                    <video id="main-webcam" autoplay playsinline></video>
                 </div>
                 
                 <div class="capture-container">
                     <div id="face-capture-container" class="capture-box" onclick="captureImage()">
-                        <div class="capture-label">Face Verification Photo</div>
+                        <div class="capture-label">Candidate Verification Snapshot</div>
                         <div id="face-preview" class="capture-preview">
                             <div class="capture-preview-placeholder">
-                                <div class="camera-icon">📷</div>
-                                <div>Click to capture</div>
+                                <div class="camera-icon"><i class="fas fa-camera"></i></div>
+                                <div style="font-weight: 600;">Click to Capture Snapshot</div>
                             </div>
                         </div>
                         <div id="face-quality-indicator" class="face-quality-indicator"></div>
                     </div>
                 </div>
                 
-                <button id="verify-btn" class="button button-primary" disabled>Verify Identity</button>
-                <button id="start-exam-btn" class="button button-success" onclick="startExam('{{ exam_details.exam_id }}')" disabled>Start Exam</button>
+                <button id="verify-btn" class="button button-primary" disabled>
+                    <i class="fas fa-fingerprint me-1"></i> Run Neural Identity Check
+                </button>
+                <button id="start-exam-btn" class="button button-success" onclick="startExam('{{ exam_details.exam_id }}')" disabled>
+                    <i class="fas fa-play me-1"></i> Begin Examination
+                </button>
             </div>
 
-            <div id="camera-error">Camera access is required to proceed with the exam.</div>
+            <div id="camera-error">
+                <i class="fas fa-triangle-exclamation me-1"></i> Hardware camera access is blocked or unavailable. Please grant webcam permissions to continue.
+            </div>
         </div>
+
         <a href="/studash" class="back-to-home">
-            <i class="fas fa-arrow-left"></i> Back to Home
+            <i class="fas fa-arrow-left"></i> Return to Candidate Workspace
         </a>
     </div>
 
     <script>
         const mainWebcam = document.getElementById('main-webcam');
-const facePreview = document.getElementById('face-preview');
-const faceQualityIndicator = document.getElementById('face-quality-indicator');
-const verifyBtn = document.getElementById('verify-btn');
-const startExamBtn = document.getElementById('start-exam-btn');
-const cameraError = document.getElementById('camera-error');
+        const facePreview = document.getElementById('face-preview');
+        const faceQualityIndicator = document.getElementById('face-quality-indicator');
+        const verifyBtn = document.getElementById('verify-btn');
+        const startExamBtn = document.getElementById('start-exam-btn');
+        const cameraError = document.getElementById('camera-error');
 
-let streamActive = false;
-let faceImage = null;
-let verificationComplete = false;
+        let streamActive = false;
+        let faceImage = null;
+        let verificationComplete = false;
 
-// Initialize webcam with higher resolution if possible
-navigator.mediaDevices.getUserMedia({ 
-    video: { 
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        facingMode: "user"
-    } 
-})
-.then((stream) => {
-    mainWebcam.srcObject = stream;
-    streamActive = true;
-    cameraError.style.display = 'none';
-})
-.catch((error) => {
-    console.error("Error accessing webcam: ", error);
-    cameraError.style.display = 'block';
-});
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: "user"
+            } 
+        })
+        .then((stream) => {
+            mainWebcam.srcObject = stream;
+            streamActive = true;
+            cameraError.style.display = 'none';
+        })
+        .catch((error) => {
+            console.error("Error accessing webcam: ", error);
+            cameraError.style.display = 'block';
+        });
 
-// Function to capture image from webcam
-function captureImage() {
-    if (!streamActive) {
-        showNotification('Camera not available', 'error');
-        return;
-    }
+        function captureImage() {
+            if (!streamActive) {
+                showNotification('Camera stream is not active', 'error');
+                return;
+            }
 
-    try {
-        // Create canvas to capture image
-        const canvas = document.createElement('canvas');
-        canvas.width = mainWebcam.videoWidth;
-        canvas.height = mainWebcam.videoHeight;
-        const context = canvas.getContext('2d');
-        context.drawImage(mainWebcam, 0, 0, canvas.width, canvas.height);
-        
-        // Convert to data URL
-        const imageData = canvas.toDataURL('image/jpeg', 0.9);
-        
-        // Update the preview
-        facePreview.innerHTML = '';
-        const img = document.createElement('img');
-        img.src = imageData;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        img.style.borderRadius = 'var(--border-radius)';
-        facePreview.appendChild(img);
-        
-        // Store the image data
-        faceImage = imageData;
-        
-        // Check face clarity (basic check - in a real app, this might use face detection API)
-        checkFaceClarity(canvas, context);
-        
-        // Reset verification status
-        verificationComplete = false;
-        startExamBtn.disabled = true;
-        verifyBtn.disabled = false;
-        
-        showNotification('Face image captured', 'success');
-        
-    } catch (error) {
-        console.error('Error capturing image:', error);
-        showNotification('Error capturing image', 'error');
-    }
-}
-
-// Function to estimate face clarity
-function checkFaceClarity(canvas, context) {
-    try {
-        // Get image data to analyze brightness and contrast
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        
-        // Calculate average brightness
-        let totalBrightness = 0;
-        for (let i = 0; i < data.length; i += 4) {
-            // Convert RGB to brightness value
-            const brightness = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
-            totalBrightness += brightness;
-        }
-        const avgBrightness = totalBrightness / (data.length / 4);
-        
-        // Calculate contrast (using standard deviation of brightness)
-        let varianceSum = 0;
-        for (let i = 0; i < data.length; i += 4) {
-            const brightness = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
-            varianceSum += Math.pow(brightness - avgBrightness, 2);
-        }
-        const contrast = Math.sqrt(varianceSum / (data.length / 4));
-        
-        // Display quality indicators based on brightness and contrast
-        faceQualityIndicator.style.display = 'block';
-        
-        // Add more specific guidance
-        let issues = [];
-        if (avgBrightness < 80) issues.push("Too dark");
-        if (avgBrightness > 200) issues.push("Too bright");
-        if (contrast < 40) issues.push("Low contrast");
-        
-        const isGoodQuality = avgBrightness > 80 && avgBrightness < 200 && contrast > 40;
-        
-        if (isGoodQuality) {
-            faceQualityIndicator.className = 'face-quality-indicator face-quality-good';
-            faceQualityIndicator.textContent = '✅ Good face clarity';
-        } else {
-            faceQualityIndicator.className = 'face-quality-indicator face-quality-bad';
-            faceQualityIndicator.textContent = `⚠️ ${issues.join(", ")}. Try again with better lighting.`;
-        }
-    } catch (error) {
-        console.error('Error checking face clarity:', error);
-        faceQualityIndicator.style.display = 'none';
-    }
-}
-
-// Verify button click handler
-verifyBtn.addEventListener('click', async () => {
-        if (!faceImage) {
-            showNotification('Please capture a face image', 'error');
-            return;
-        }
-        
-        // Check if face quality is good before proceeding
-        if (!document.querySelector('.face-quality-good')) {
-            showNotification('Please ensure your face is clearly visible with good lighting', 'error');
-            return;
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = mainWebcam.videoWidth;
+                canvas.height = mainWebcam.videoHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(mainWebcam, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = canvas.toDataURL('image/jpeg', 0.9);
+                
+                facePreview.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = imageData;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = 'var(--radius-lg)';
+                facePreview.appendChild(img);
+                
+                faceImage = imageData;
+                checkFaceClarity(canvas, context);
+                
+                verificationComplete = false;
+                startExamBtn.disabled = true;
+                verifyBtn.disabled = false;
+                
+                showNotification('Face snapshot captured successfully', 'success');
+            } catch (error) {
+                console.error('Error capturing image:', error);
+                showNotification('Error capturing image from stream', 'error');
+            }
         }
 
-        try {
-            showNotification('Processing verification...', 'info');
+        function checkFaceClarity(canvas, context) {
+            try {
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                let totalBrightness = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    totalBrightness += (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
+                }
+                const avgBrightness = totalBrightness / (data.length / 4);
+                
+                let varianceSum = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    const brightness = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
+                    varianceSum += Math.pow(brightness - avgBrightness, 2);
+                }
+                const contrast = Math.sqrt(varianceSum / (data.length / 4));
+                
+                faceQualityIndicator.style.display = 'block';
+                let issues = [];
+                if (avgBrightness < 75) issues.push("Too dark");
+                if (avgBrightness > 210) issues.push("Too bright");
+                if (contrast < 35) issues.push("Low contrast");
+                
+                const isGoodQuality = avgBrightness >= 75 && avgBrightness <= 210 && contrast >= 35;
+                
+                if (isGoodQuality) {
+                    faceQualityIndicator.className = 'face-quality-indicator face-quality-good';
+                    faceQualityIndicator.innerHTML = '<i class="fas fa-check-circle me-1"></i> Face clarity and illumination are optimal';
+                } else {
+                    faceQualityIndicator.className = 'face-quality-indicator face-quality-bad';
+                    faceQualityIndicator.innerHTML = `<i class="fas fa-circle-exclamation me-1"></i> ${issues.join(", ")}. Please adjust your lighting.`;
+                }
+            } catch (error) {
+                console.error('Error checking face clarity:', error);
+                faceQualityIndicator.style.display = 'none';
+            }
+        }
+
+        verifyBtn.addEventListener('click', async () => {
+            if (!faceImage) {
+                showNotification('Please capture a face image first', 'error');
+                return;
+            }
             
-            // Send image to server for verification and embedding
-            const response = await fetch('/verify_faces', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    webcam_image: faceImage
-                })
-            });
+            try {
+                verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Analyzing Landmarks...';
+                verifyBtn.disabled = true;
+                showNotification('Extracting neural landmarks and comparing against enrolled profile...', 'info');
+                
+                const response = await fetch('/verify_faces', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ webcam_image: faceImage })
+                });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+
+                const result = await response.json();
+                verifyBtn.innerHTML = '<i class="fas fa-fingerprint me-1"></i> Run Neural Identity Check';
+                verifyBtn.disabled = false;
+
+                if (result.status === 'success') {
+                    localStorage.setItem('verifiedFaceEmbedding', JSON.stringify(result.embedding));
+                    showNotification('Candidate identity successfully verified!', 'success');
+                    verificationComplete = true;
+                    startExamBtn.disabled = false;
+                } else {
+                    showNotification(result.message || 'Face verification mismatch', 'error');
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                verifyBtn.innerHTML = '<i class="fas fa-fingerprint me-1"></i> Run Neural Identity Check';
+                verifyBtn.disabled = false;
+                showNotification('Identity check failed. Please recapture in good lighting.', 'error');
             }
+        });
 
-            const result = await response.json();
-            console.log('Verification result:', result);
+        function showNotification(message, type) {
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(n => n.remove());
 
-            if (result.status === 'success') {
-                // Store the verified face embedding in localStorage
-                localStorage.setItem('verifiedFaceEmbedding', JSON.stringify(result.embedding));
-                showNotification('Identity verified successfully!', 'success');
-                verificationComplete = true;
-                startExamBtn.disabled = false;
-            } else {
-                showNotification(result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Verification error:', error);
-            showNotification('Error during verification. Please try again.', 'error');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 4500);
         }
-    });
 
-function showNotification(message, type) {
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(notification => notification.remove());
-
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-    }, 4700);
-}
-
-function startExam(exam_id) {
-    if (!verificationComplete) {
-        showNotification('Please complete identity verification first.', 'error');
-        return;
-    }
-    window.location.href = `/questions/${exam_id}`;
-}
+        function startExam(exam_id) {
+            if (!verificationComplete) {
+                showNotification('Please complete identity verification first.', 'error');
+                return;
+            }
+            window.location.href = `/questions/${exam_id}`;
+        }
     </script>
 </body>
 </html>

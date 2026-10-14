@@ -4,186 +4,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finalize Examination - {{ exam_title }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Finalize Examination | DL Procted Examination</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
-        :root {
-            --primary-blue: #1a56db;
-            --secondary-blue: #e8f1fd;
-            --accent-blue: #3f83f8;
-            --dark-gray: #1f2937;
-            --medium-gray: #4b5563;
-            --light-gray: #f3f4f6;
-            --border-radius: 8px;
-        }
-
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light-gray);
+            font-family: var(--font-sans);
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
             line-height: 1.6;
-            color: var(--dark-gray);
+        }
+
+        .topbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: var(--shadow-xs);
         }
 
         .container {
-            max-width: 800px;
-            margin: 60px auto;
-            background: #ffffff;
-            padding: 40px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            max-width: 920px;
+            margin: 40px auto 80px;
+            padding: 0 24px;
         }
 
+        .header-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 32px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
 
-        .navbar {
+        .header-card::before {
+            content: '';
             position: absolute;
-            top: 20px;
-            left: 40px;
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #333;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+        }
+
+        .header-meta {
             display: flex;
             align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .navbar-brand {
-            font-size: 2rem;
-            color: #333;
-            letter-spacing: 1px;
-            text-decoration: none; /* Added to remove the underline */
+        .badge-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid var(--accent-border);
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .navbar-brand span {
-            color: #4a90e2;
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0 0 16px;
+            letter-spacing: -0.02em;
         }
 
-        .navbar-brand span:first-child {
-            color: #0c447b;
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            background: var(--bg-canvas);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 20px;
         }
 
-        h2 {
-            color: var(--dark-gray);
-            font-weight: 600;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--light-gray);
-            padding-bottom: 1rem;
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .exam-info {
-            background: var(--secondary-blue);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            margin: 2rem 0;
-            border-left: 4px solid var(--primary-blue);
+        .info-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .exam-info p {
-            margin: 0.8rem 0;
-            color: var(--medium-gray);
-        }
-
-        .question-block {
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            background: var(--light-gray);
-            border-radius: var(--border-radius);
-        }
-
-        .question-number {
-            font-weight: 600;
-            color: var(--primary-blue);
-            margin-bottom: 1rem;
+        .info-value {
             font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .rules-box {
+            margin-top: 16px;
+            padding: 16px;
+            background: #fff;
+            border-radius: var(--radius);
+            border-left: 3px solid var(--accent);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 32px 0 16px;
+        }
+
+        .section-heading h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .question-card {
+            background: #ffffff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-xs);
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .question-card:hover {
+            border-color: var(--border-highlight);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .question-pill {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .marks-tag {
+            background: var(--bg-canvas);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+        }
+
+        .question-body {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 14px;
         }
 
         .question-image {
             max-width: 100%;
-            height: auto;
-            margin: 1rem 0;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin: 12px 0 16px;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 14px 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .options-list li {
+            padding: 10px 14px;
+            background: var(--bg-canvas);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .options-list li::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-highlight);
+            flex-shrink: 0;
+        }
+
+        .action-bar {
+            position: sticky;
+            bottom: 24px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 40px;
+            backdrop-filter: blur(8px);
         }
 
         .submit-btn {
-            background-color: var(--primary-blue);
-            color: white;
+            background: var(--accent-gradient);
+            color: #ffffff;
             border: none;
             padding: 12px 28px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            float: right;
-            margin-top: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-crimson);
         }
 
         .submit-btn:hover {
-            background-color: var(--accent-blue);
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
             transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        @media (max-width: 768px) {
-            .container {
-                margin: 20px;
-                padding: 25px;
-            }
-            
-            .navbar {
-                padding: 15px 20px;
-            }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-surface-hover);
+            color: var(--text-primary);
         }
     </style>
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <a href="#" class="navbar-brand">
-            <span></span><span></span>
+    <!-- Topbar Navigation -->
+    <header class="topbar">
+        <a href="/teacher/trdash" class="dl-brand">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+            <div class="dl-brand-text">
+                <span class="dl-brand-title">DL <span class="crimson">Procted</span></span>
+                <span class="dl-brand-subtitle">Examination</span>
+            </div>
         </a>
-    </nav>
+        <a href="/teacher/trdash" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Return to Dashboard
+        </a>
+    </header>
 
     <!-- Main Content -->
     <div class="container">
-        <h2>Finalize Examination: {{ exam_title }}</h2>
-        
-        <!-- Exam Details -->
-        <div class="exam-info">
-            <p><strong>Duration:</strong> {{ exam_duration }} minutes</p>
-            <p><strong>Rules & Guidelines:</strong> {{ exam_rules }}</p>
-            <p><strong>Scheduled Date:</strong> {{ exam_date }}</p>
-            <p><strong>Start Time:</strong> {{ exam_time }}</p>
+        <!-- Exam Meta Card -->
+        <div class="header-card">
+            <div class="header-meta">
+                <span class="badge-preview"><i class="fas fa-shield-halved"></i> Pre-Publish Review</span>
+            </div>
+            <h1 class="header-title">{{ exam_title }}</h1>
+            <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem;">
+                Review all test parameters, schedule constraints, and question pool before issuing public examination access.
+            </p>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-stopwatch"></i> Duration</span>
+                    <span class="info-value">{{ exam_duration }} Minutes</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-calendar-day"></i> Scheduled Date</span>
+                    <span class="info-value">{{ exam_date }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-clock"></i> Start Window</span>
+                    <span class="info-value">{{ exam_time }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-list-check"></i> Total Items</span>
+                    <span class="info-value">{{ questions|length }} Question{{ 's' if questions|length > 1 }}</span>
+                </div>
+            </div>
+
+            {% if exam_rules %}
+            <div class="rules-box">
+                <strong style="color: var(--text-primary); display: block; margin-bottom: 6px;"><i class="fas fa-circle-info"></i> Candidate Guidelines:</strong>
+                {{ exam_rules }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section-heading">
+            <h3><i class="fas fa-tasks" style="color: var(--accent);"></i> Question Schema</h3>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">{{ questions|length }} items prepared</span>
         </div>
 
         <!-- Questions List -->
         {% for question in questions %}
-        <div class="question-block">
-            <div class="question-number">Question {{ loop.index }} ({{ question.marks }} marks)</div>
-            <p>{{ question.question_text }}</p>
+        <div class="question-card">
+            <div class="question-header">
+                <div class="question-pill">
+                    <i class="fas fa-circle-question"></i> Question {{ loop.index }}
+                </div>
+                <span class="marks-tag">{{ question.marks }} Mark{{ 's' if question.marks > 1 }}</span>
+            </div>
+            <div class="question-body">
+                {{ question.question_text }}
+            </div>
             {% if question.question_image %}
-            <img src="data:image/jpeg;base64,{{ question.question_image }}" class="question-image" alt="Question Visual">
+            <img src="data:image/jpeg;base64,{{ question.question_image }}" class="question-image" alt="Question Visual Attachment">
             {% endif %}
             {% if question.options %}
-            <div class="options">
-                <strong>Options:</strong>
-                <ul>
-                    {% for option in question.options.split('\n') %}
-                        {% if option.strip() %}
-                        <li>{{ option.replace('•', '').strip() }}</li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
+            <ul class="options-list">
+                {% for option in question.options.split('\n') %}
+                    {% if option.strip() %}
+                    <li>{{ option.replace('•', '').strip() }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
             {% endif %}
         </div>
         {% endfor %}
 
-        <!-- Action Button -->
-        <button id="submitBtn" class="submit-btn">
-            Finalize & Publish Exam
-        </button>
+        <!-- Sticky Publish Action Bar -->
+        <div class="action-bar">
+            <div>
+                <strong style="display: block; font-size: 0.95rem; color: var(--text-primary);">Ready to distribute?</strong>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">This will generate a cryptographic candidate exam link.</span>
+            </div>
+            <button id="submitBtn" class="submit-btn">
+                <i class="fas fa-paper-plane"></i> Finalize & Publish Exam
+            </button>
+        </div>
     </div>
 
     <script>

@@ -3,144 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Answers | Student View</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Candidate Performance Review: {{ exam_title }} | DL Procted Examination</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
-        :root {
-            --primary: #2563eb;
-            --secondary: #1e40af;
-            --background: #f8fafc;
-            --surface: #ffffff;
-        }
-
         body { 
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-sans);
             margin: 0;
-            padding: 40px 0;
-            background: var(--background);
-            color: #1e293b;
+            padding: 40px 20px;
+            background: var(--bg-canvas);
+            color: var(--text-primary);
         }
 
         .container {
-            max-width: 840px;
+            max-width: 860px;
             margin: 0 auto;
-            background: var(--surface);
+            background: #ffffff;
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
         .back-link {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: var(--primary);
-            font-weight: 500;
+            color: var(--accent);
+            font-weight: 600;
             text-decoration: none;
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: var(--radius);
+            background: var(--accent-light);
+            border: 1px solid var(--accent-border);
             transition: all 0.2s;
-            margin-bottom: 32px;
         }
 
         .back-link:hover {
-            background: #eff6ff;
-            transform: translateX(-4px);
+            background: rgba(201, 28, 40, 0.12);
+            transform: translateX(-3px);
         }
 
         h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 40px;
-            position: relative;
-            padding-bottom: 16px;
-        }
-
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 2px;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin: 0 0 24px 0;
         }
 
         .question {
             margin: 24px 0;
             padding: 24px;
-            background: var(--background);
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
             position: relative;
+            box-shadow: var(--shadow-xs);
             transition: transform 0.2s;
         }
 
         .question:hover {
-            transform: translateX(4px);
-        }
-
-        .question h3 {
-            font-size: 18px;
-            color: var(--secondary);
-            margin: 0 0 16px 0;
+            transform: translateY(-2px);
+            border-color: var(--border-highlight);
+            box-shadow: var(--shadow-md);
         }
 
         .question-number {
             position: absolute;
             top: -12px;
-            left: -12px;
-            background: var(--primary);
+            left: 20px;
+            background: var(--accent-gradient);
             color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(201, 28, 40, 0.3);
+        }
+
+        .question h3 {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin: 8px 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .question p {
+            font-size: 15px;
             font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            line-height: 1.5;
         }
 
         .question-image {
             max-width: 100%;
             height: auto;
-            margin: 16px 0;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
+            margin: 14px 0;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .options ul {
+            padding-left: 20px;
+            margin: 10px 0;
+            color: var(--text-secondary);
+            font-size: 14px;
         }
 
         .answer-highlight {
             display: inline-block;
-            padding: 8px 12px;
-            background: #dbeafe;
-            color: var(--secondary);
-            border-radius: 4px;
-            font-weight: 500;
-            margin: 8px 0;
+            padding: 8px 14px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid var(--accent-border);
+            border-radius: var(--radius);
+            font-weight: 700;
+            margin-top: 10px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="{{ url_for('stu_result') }}" class="back-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Back to Results
-        </a>
+        <div class="header-bar">
+            <a href="{{ url_for('stu_result') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Results
+            </a>
+            <div class="dl-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+                <span class="dl-brand-title" style="font-size: 1.05rem;">DL <span class="crimson">Procted</span> Examination</span>
+            </div>
+        </div>
+
         <h1>Exam Performance Review: {{ exam_title }}</h1>
         
         {% for answer in answers %}
         <div class="question">
-            <div class="question-number">{{ loop.index }}</div>
-            <h3>{{ answer.marks }} Mark{{ 's' if answer.marks > 1 }}</h3>
+            <div class="question-number">Question #{{ loop.index }}</div>
+            <h3>Worth {{ answer.marks }} Mark{{ 's' if answer.marks > 1 }}</h3>
             <p>{{ answer.question_text }}</p>
             {% if answer.question_image %}
             <img src="data:image/jpeg;base64,{{ answer.question_image }}" class="question-image">
             {% endif %}
             {% if answer.options %}
             <div class="options">
-                <strong>Options:</strong>
+                <strong style="font-size: 13px; color: var(--text-muted); text-transform: uppercase;">Provided Options:</strong>
                 <ul>
                     {% for option in answer.options.split('\n') %}
                         {% if option.strip() %}
@@ -150,7 +172,7 @@
                 </ul>
             </div>
             {% endif %}
-            <div class="answer-highlight">Answer: {{ answer.answer }}</div>
+            <div class="answer-highlight"><i class="fas fa-check-double me-1"></i> Submitted Candidate Response: {{ answer.answer }}</div>
         </div>
         {% endfor %}
     </div>

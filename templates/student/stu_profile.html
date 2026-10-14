@@ -1,30 +1,45 @@
 {% extends 'student/_layout.html' %}
-{% block title %}My Profile{% endblock %}
+{% block title %}Candidate Profile{% endblock %}
 {% block nav_profile %}active{% endblock %}
 {% block content %}
-<h2>My Profile</h2>
+<div style="margin-bottom: 24px;">
+    <h2>Candidate Profile & Credentials</h2>
+    <p style="color: var(--text-secondary); margin: 0; font-size: 0.92rem;">Institutional identity record used for exam admission and integrity validation</p>
+</div>
+
 <div class="panel">
-    <div class="detail-row"><span class="k">Full name</span><span>{{ student.fullname or '—' }}</span></div>
-    <div class="detail-row"><span class="k">Email</span><span>{{ student.email or '—' }}</span></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Personal Information</h3>
+        <span class="dl-badge dl-badge-crimson"><i class="fas fa-id-card"></i> Candidate Data</span>
+    </div>
+    <div class="detail-row"><span class="k">Full Name</span><span style="font-weight: 600;">{{ student.fullname or '—' }}</span></div>
+    <div class="detail-row"><span class="k">Email Address</span><span>{{ student.email or '—' }}</span></div>
     <div class="detail-row"><span class="k">Phone</span><span>{{ student.phone or '—' }}</span></div>
     <div class="detail-row"><span class="k">Address</span><span>{{ student.address or 'Not provided' }}</span></div>
-    <a class="btn" href="{{ url_for('edit_personal_info') }}">Edit personal info</a>
+    <a class="btn" href="{{ url_for('edit_personal_info') }}"><i class="fas fa-user-pen me-1"></i> Edit Personal Info</a>
 </div>
 
-<h2 style="margin-top:28px">Academic information</h2>
-<div class="panel">
-    <div class="detail-row"><span class="k">Course</span><span>{{ student.course or 'Not provided' }}</span></div>
-    <div class="detail-row"><span class="k">Year</span><span>{{ student.year or 'Not provided' }}</span></div>
-    <a class="btn" href="{{ url_for('edit_academic_info') }}">Edit academic info</a>
+<div class="panel" style="margin-top: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Academic Enrollment</h3>
+        <span class="dl-badge dl-badge-success"><i class="fas fa-graduation-cap"></i> Verified Student</span>
+    </div>
+    <div class="detail-row"><span class="k">Degree / Course</span><span style="font-weight: 600;">{{ student.course or 'Not provided' }}</span></div>
+    <div class="detail-row"><span class="k">Academic Year</span><span>{{ student.year or 'Not provided' }}</span></div>
+    <a class="btn" href="{{ url_for('edit_academic_info') }}"><i class="fas fa-pen-to-square me-1"></i> Edit Academic Info</a>
 </div>
 
-<h2 style="margin-top:28px">Skills</h2>
-<div class="panel">
-    {% if student.skills %}
-        {% for skill in student.skills %}<span class="tag">{{ skill }}</span>{% endfor %}
-    {% else %}
-        <span style="color:#718096">No skills added yet.</span>
-    {% endif %}
-    <div><a class="btn" href="{{ url_for('edit_skills') }}">Edit skills</a></div>
+<div class="panel" style="margin-top: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Competencies & Skills</h3>
+    </div>
+    <div style="margin: 12px 0 16px;">
+        {% if student.skills %}
+            {% for skill in student.skills %}<span class="tag"><i class="fas fa-check-circle me-1" style="font-size: 10px;"></i>{{ skill }}</span>{% endfor %}
+        {% else %}
+            <span style="color: var(--text-muted); font-size: 14px;">No competencies added yet.</span>
+        {% endif %}
+    </div>
+    <div><a class="btn" href="{{ url_for('edit_skills') }}"><i class="fas fa-tags me-1"></i> Update Skills</a></div>
 </div>
 {% endblock %}

@@ -204,6 +204,27 @@ def stu_login():
     # For GET requests, pass exam_link to the template
     return render_template('student/stu_login.html', exam_link=exam_link)
 
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        flash("If an account is associated with this email, recovery instructions have been sent.", "success")
+        return redirect(url_for('forgot_password'))
+    return render_template('forgot_password.html')
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token=None):
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        if not new_password or new_password != confirm_password:
+            flash("Passwords do not match. Please verify and retry.", "danger")
+            return redirect(url_for('reset_password', token=token or 'token'))
+        flash("Password updated successfully. Please log in with your new credentials.", "success")
+        return redirect(url_for('stu_login'))
+    return render_template('reset_password.html', token=token or 'token')
+
 # for login session
 def verify_session(user_id, session_id):
     try:

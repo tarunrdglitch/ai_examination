@@ -1,25 +1,53 @@
 {% extends 'student/_layout.html' %}
-{% block title %}Exam History{% endblock %}
+{% block title %}Candidate Exam History{% endblock %}
 {% block nav_history %}active{% endblock %}
 {% block content %}
-<h2>Exam History</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Candidate Examination History</h2>
+        <p style="color: var(--text-secondary); margin: 0; font-size: 0.92rem;">Audit record of all past submissions and neural proctoring telemetries</p>
+    </div>
+</div>
+
 <table class="t">
     <thead>
-        <tr><th>Exam</th><th>Submitted</th><th>Score</th><th>Status</th><th>Violations</th></tr>
+        <tr>
+            <th>Examination</th>
+            <th>Submission Date</th>
+            <th>Score</th>
+            <th>Outcome</th>
+            <th>Integrity Audit</th>
+        </tr>
     </thead>
     <tbody>
         {% if results %}
             {% for r in results %}
             <tr>
-                <td><a href="{{ url_for('student_exam_answers', answer_id=r.answer_id) }}">{{ r.exam_title }}</a></td>
+                <td>
+                    <a href="{{ url_for('student_exam_answers', answer_id=r.answer_id) }}" style="font-weight: 700; color: var(--text-primary);">
+                        <i class="fas fa-file-lines me-2 text-danger"></i>{{ r.exam_title }}
+                    </a>
+                </td>
                 <td>{{ r.submitted_at.strftime('%Y-%m-%d %H:%M') if r.submitted_at and r.submitted_at.strftime else (r.submitted_at or '') }}</td>
-                <td>{{ r.score if r.score is not none else '—' }}</td>
-                <td>{{ r.status or '—' }}</td>
-                <td><a href="{{ url_for('view_violations', user_id=session['user_id'], exam_id=r.exam_id) }}" style="color:#4299e1">View</a></td>
+                <td style="font-weight: 700;">{{ r.score if r.score is not none else '—' }} pts</td>
+                <td>
+                    {% if r.status == 'passed' %}
+                        <span class="dl-badge dl-badge-success"><i class="fas fa-check"></i> Passed</span>
+                    {% elif r.status == 'failed' %}
+                        <span class="dl-badge" style="background: var(--error-bg); color: var(--error); border: 1px solid var(--error-border);"><i class="fas fa-xmark"></i> Failed</span>
+                    {% else %}
+                        <span class="dl-badge" style="background: #f1f5f9; color: var(--text-secondary);">{{ r.status or '—' }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('view_violations', user_id=session['user_id'], exam_id=r.exam_id) }}" class="dl-btn dl-btn-outline" style="padding: 4px 12px; font-size: 12px;">
+                        <i class="fas fa-shield-halved me-1"></i> Violations
+                    </a>
+                </td>
             </tr>
             {% endfor %}
         {% else %}
-            <tr><td colspan="5" style="text-align:center">No exams taken yet.</td></tr>
+            <tr><td colspan="5" style="text-align:center; padding: 40px; color: var(--text-muted);"><i class="fas fa-inbox mb-2" style="font-size: 2rem; display: block;"></i> No examination attempts logged yet.</td></tr>
         {% endif %}
     </tbody>
 </table>

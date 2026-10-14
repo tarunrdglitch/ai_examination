@@ -3,198 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Online Proctoring System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>About DL Procted Examination | Enterprise Integrity</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
-        :root {
-            --primary-color: #2A4365;
-            --secondary-color: #4299E1;
-            --accent-color: #48BB78;
-            --text-color: #4A5568;
-        }
-
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: var(--font-sans);
             line-height: 1.6;
             margin: 0;
             padding: 0;
-            background-color: #F7FAFC;
-            color: var(--text-color);
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
         }
 
         .navbar {
-            background-color: white;
+            background-color: #ffffff;
             padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--border);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-        }
-
-        .navbar-brand {
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .navbar-brand span:first-child {
-            color: var(--primary-color);
-        }
-
-        .navbar-brand span:last-child {
-            color: var(--secondary-color);
+            box-shadow: var(--shadow-xs);
         }
 
         .container {
-            max-width: 1200px;
-            margin: 100px auto 40px;
-            padding: 0 2rem;
+            max-width: 1100px;
+            margin: 110px auto 40px;
+            padding: 0 1.5rem;
         }
 
         .about-header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 3.5rem;
         }
 
         .about-header h1 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-        }
-
-        .about-header p {
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 0 auto;
-            color: var(--text-color);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease;
-            text-align: center;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            color: var(--secondary-color);
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
             margin-bottom: 1rem;
         }
 
-        .highlight {
-            color: var(--primary-color);
-            font-weight: 600;
+        .about-header p {
+            font-size: 1.15rem;
+            max-width: 760px;
+            margin: 0 auto;
+            color: var(--text-secondary);
         }
 
         .mission-section {
-            background: white;
+            background: #ffffff;
             padding: 3rem;
-            border-radius: 8px;
-            margin: 3rem 0;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border-radius: var(--radius-xl);
+            margin: 2.5rem 0;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
         }
+        .mission-section h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 12px; }
+        .mission-section p { font-size: 1.05rem; color: var(--text-secondary); max-width: 800px; margin: 0 auto; }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin: 2.5rem 0;
+        }
+
+        .feature-card {
+            background: #ffffff;
+            padding: 2.25rem 2rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s ease;
+            text-align: left;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-highlight);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 1.25rem;
+            width: 48px;
+            height: 48px;
+            background: var(--accent-light);
+            border: 1px solid var(--accent-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+        .feature-card p { font-size: 0.92rem; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+        .highlight { color: var(--accent); font-weight: 600; }
 
         footer {
             text-align: center;
-            margin-top: 4rem;
-            padding: 2rem 0;
-            border-top: 1px solid #E2E8F0;
-            color: #718096;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin-top: 80px;
-                padding: 0 1rem;
-            }
-            
-            .about-header h1 {
-                font-size: 2rem;
-            }
-            
-            .mission-section {
-                padding: 2rem;
-            }
+            margin-top: 5rem;
+            padding: 2.5rem 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
-        <a href="#" class="navbar-brand">
-            <span>Online</span><span>Ex</span>
-        </a>
+        <div style="max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <a href="/" class="dl-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+                <div class="dl-brand-text">
+                    <span class="dl-brand-title">DL <span class="crimson">Procted</span></span>
+                    <span class="dl-brand-subtitle">Examination</span>
+                </div>
+            </a>
+            <a href="/" class="dl-btn dl-btn-secondary" style="padding: 7px 16px; font-size: 13px;">
+                <i class="fas fa-home me-1"></i> Return Home
+            </a>
+        </div>
     </nav>
 
     <div class="container">
         <div class="about-header">
-            <h1>Redefining Online Assessment Integrity</h1>
-            <p>Pioneering the future of secure digital examinations through advanced AI proctoring solutions</p>
+            <span class="dl-badge dl-badge-crimson mb-2"><i class="fas fa-shield"></i> Integrity Infrastructure</span>
+            <h1>Redefining Examination Integrity with AI</h1>
+            <p>DL Procted Examination delivers next-generation autonomous proctoring, neural telemetry, and fraud prevention for global educational and certification standards.</p>
         </div>
 
         <div class="mission-section">
-            <h2>Our Mission</h2>
-            <p>To empower educational institutions and certification bodies with robust, scalable, and intelligent proctoring solutions that ensure exam integrity while enhancing accessibility for learners worldwide.</p>
+            <h2>Our Architectural Mission</h2>
+            <p>To provide modern academic institutions, testing agencies, and professional certification authorities with reliable, low-friction, privacy-respecting AI proctoring that guarantees credential validity across digital platforms.</p>
         </div>
 
         <div class="features-grid">
             <div class="feature-card">
-                <i class="fas fa-brain feature-icon"></i>
-                <h3>AI-Driven Monitoring</h3>
-                <p>Advanced algorithms for <span class="highlight">real-time face recognition</span> and <span class="highlight">behavior analysis</span></p>
+                <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>Neural Facial Telemetry</h3>
+                <p>Real-time 68-point facial landmark evaluation providing <span class="highlight">gaze trajectory tracking</span> and <span class="highlight">multi-candidate detection</span>.</p>
             </div>
 
             <div class="feature-card">
-                <i class="fas fa-shield-alt feature-icon"></i>
-                <h3>Multi-Layer Security</h3>
-                <p>Comprehensive protection against <span class="highlight">malpractice</span> with <span class="highlight">encrypted data transmission</span></p>
+                <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+                <h3>YOLOv8 Device Detection</h3>
+                <p>Edge neural network flags unauthorized hardware, including <span class="highlight">cell phones</span>, <span class="highlight">books</span>, and secondary screens.</p>
             </div>
 
             <div class="feature-card">
-                <i class="fas fa-chart-line feature-icon"></i>
-                <h3>Scalable Infrastructure</h3>
-                <p>Cloud-based architecture supporting <span class="highlight">thousands of concurrent exams</span></p>
-            </div>
-        </div>
-
-        <div class="features-grid">
-            <div class="feature-card">
-                <i class="fas fa-eye feature-icon"></i>
-                <h3>Gaze Tracking</h3>
-                <p>Advanced visual monitoring with <span class="highlight">98.7% detection accuracy</span></p>
+                <div class="feature-icon"><i class="fas fa-server"></i></div>
+                <h3>Enterprise Scalability</h3>
+                <p>High-concurrency streaming architecture supporting <span class="highlight">thousands of simultaneous examinees</span> with sub-second audit logging.</p>
             </div>
 
             <div class="feature-card">
-                <i class="fas fa-users feature-icon"></i>
-                <h3>Role-Based Access</h3>
-                <p>Customizable portals for <span class="highlight">administrators</span>, <span class="highlight">institutions</span>, and <span class="highlight">students</span></p>
+                <div class="feature-icon"><i class="fas fa-microphone-lines"></i></div>
+                <h3>Acoustic Anomaly Profiling</h3>
+                <p>Multi-frequency audio filters track <span class="highlight">background vocal whispers</span> and room acoustic shifts without intrusive raw recording.</p>
             </div>
 
             <div class="feature-card">
-                <i class="fas fa-lock feature-icon"></i>
-                <h3>Data Protection</h3>
-                <p>GDPR-compliant storage with <span class="highlight">end-to-end encryption</span></p>
+                <div class="feature-icon"><i class="fas fa-users-gear"></i></div>
+                <h3>Triple Role Governance</h3>
+                <p>Tailored workflows and dashboards for <span class="highlight">administrators</span>, <span class="highlight">faculty instructors</span>, and <span class="highlight">candidates</span>.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                <h3>Evidence & Tamper Defense</h3>
+                <p>Encrypted forensic screenshot archives and immutable telemetry logs ensure <span class="highlight">institutional compliance</span>.</p>
             </div>
         </div>
 
         <footer>
-            © 2025 Online Proctoring System. All rights reserved.<br>
-            Committed to Academic Integrity and Technological Excellence
+            © 2026 DL Procted Examination. All rights reserved.<br>
+            Designed for Enterprise Academic Integrity and Autonomous Reliability.
         </footer>
     </div>
 </body>

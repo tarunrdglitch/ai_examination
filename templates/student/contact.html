@@ -3,216 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - Proctoring Online Exam</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Contact & Technical Support | DL Procted Examination</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
-        :root {
-            --primary-color: #2A4365;
-            --secondary-color: #4299E1;
-            --accent-color: #48BB78;
-            --text-color: #4A5568;
-        }
-
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: var(--font-sans);
             line-height: 1.6;
             margin: 0;
             padding: 0;
-            background-color: #F7FAFC;
-            color: var(--text-color);
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
         }
 
         .navbar {
-            background-color: white;
+            background-color: #ffffff;
             padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--border);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-        }
-
-        .navbar-brand {
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .navbar-brand span:first-child {
-            color: var(--primary-color);
-        }
-
-        .navbar-brand span:last-child {
-            color: var(--secondary-color);
+            box-shadow: var(--shadow-xs);
         }
 
         .container {
-            max-width: 1200px;
-            margin: 100px auto 40px;
-            padding: 0 2rem;
+            max-width: 1100px;
+            margin: 110px auto 50px;
+            padding: 0 1.5rem;
         }
 
         .contact-header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 3.5rem;
         }
 
         .contact-header h1 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
             margin-bottom: 1rem;
         }
 
         .contact-header p {
-            font-size: 1.1rem;
-            max-width: 600px;
+            font-size: 1.15rem;
+            max-width: 680px;
             margin: 0 auto;
-            color: var(--text-color);
+            color: var(--text-secondary);
         }
 
         .contact-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
         }
 
         .contact-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease;
+            background: #ffffff;
+            padding: 2.25rem 2rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s ease;
         }
 
         .contact-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-highlight);
         }
 
         .contact-card h2 {
-            color: var(--primary-color);
-            margin-top: 0;
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin: 0 0 1rem;
+            font-size: 1.2rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 10px;
         }
 
-        .contact-card i {
-            font-size: 1.5rem;
-            color: var(--secondary-color);
+        .contact-card i.card-icon {
+            font-size: 1.25rem;
+            color: var(--accent);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--accent-light);
+            border: 1px solid var(--accent-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .contact-info {
-            margin: 1rem 0;
+            color: var(--text-secondary);
+            font-size: 0.92rem;
         }
 
         .contact-info p {
-            margin: 0.75rem 0;
+            margin: 0.5rem 0;
         }
 
-        a {
-            color: var(--secondary-color);
+        .contact-info a {
+            color: var(--accent);
+            font-weight: 600;
             text-decoration: none;
-            transition: color 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
         }
-
-        a:hover {
-            color: var(--primary-color);
-        }
-
-        .social-links {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .address {
-            border-left: 3px solid var(--accent-color);
-            padding-left: 1rem;
-            margin: 1rem 0;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin-top: 80px;
-                padding: 0 1rem;
-            }
-            
-            .contact-header h1 {
-                font-size: 2rem;
-            }
+        .contact-info a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
-        <a href="#" class="navbar-brand">
-            <span>Online</span><span>Ex</span>
-        </a>
+        <div style="max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <a href="/" class="dl-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+                <div class="dl-brand-text">
+                    <span class="dl-brand-title">DL <span class="crimson">Procted</span></span>
+                    <span class="dl-brand-subtitle">Examination</span>
+                </div>
+            </a>
+            <a href="/" class="dl-btn dl-btn-secondary" style="padding: 7px 16px; font-size: 13px;">
+                <i class="fas fa-home me-1"></i> Return Home
+            </a>
+        </div>
     </nav>
 
     <div class="container">
         <div class="contact-header">
-            <h1>Contact Our Support Team</h1>
-            <p>Have questions or need assistance? Our dedicated support team is here to ensure your proctoring experience is seamless and successful.</p>
+            <span class="dl-badge dl-badge-crimson mb-2"><i class="fas fa-headset"></i> Support & Dispatch</span>
+            <h1>Get in Touch with Our Team</h1>
+            <p>Our dedicated proctoring engineers and support specialists are on standby to resolve technical, institutional, and student requests.</p>
         </div>
 
         <div class="contact-grid">
             <div class="contact-card">
-                <h2><i class="fas fa-envelope"></i>General Inquiries</h2>
+                <h2><i class="fas fa-envelope card-icon"></i> General Inquiries</h2>
                 <div class="contact-info">
-                    <p><a href="mailto:support@yourexamproctor.com">support@yourexamproctor.com</a></p>
-                    <p>Response time: Within 24 hours</p>
+                    <p><a href="mailto:support@dl-procted.ai">support@dl-procted.ai</a></p>
+                    <p>Standard response window: within 2 hours</p>
                 </div>
             </div>
 
             <div class="contact-card">
-                <h2><i class="fas fa-headset"></i>Technical Support</h2>
+                <h2><i class="fas fa-shield-halved card-icon"></i> 24/7 Proctoring Incident Desk</h2>
                 <div class="contact-info">
-                    <p><a href="tel:+11234567890">+1 (123) 456-7890</a></p>
-                    <p><a href="mailto:tech@yourexamproctor.com">tech@yourexamproctor.com</a></p>
-                    <p>24/7 Availability</p>
+                    <p><a href="tel:+18005553577">+1 (800) 555-DL-PROCTOR</a></p>
+                    <p><a href="mailto:incident@dl-procted.ai">incident@dl-procted.ai</a></p>
+                    <p>Continuous uptime coverage during live exam windows</p>
                 </div>
             </div>
 
             <div class="contact-card">
-                <h2><i class="fas fa-briefcase"></i>Business Inquiries</h2>
+                <h2><i class="fas fa-building-columns card-icon"></i> Institutional Partnerships</h2>
                 <div class="contact-info">
-                    <p><a href="mailto:partnerships@yourexamproctor.com">partnerships@yourexamproctor.com</a></p>
-                    <p>Enterprise solutions and partnerships</p>
+                    <p><a href="mailto:enterprise@dl-procted.ai">enterprise@dl-procted.ai</a></p>
+                    <p>Campus licensing and dedicated on-prem neural nodes</p>
                 </div>
             </div>
 
             <div class="contact-card">
-                <h2><i class="fas fa-map-marker-alt"></i>Corporate Office</h2>
-                <div class="address">
-                    <p><strong>Your Exam Proctor Inc.</strong></p>
-                    <p>123 Proctoring Lane<br>
-                    Suite 456<br>
-                    City, State, ZIP Code</p>
-                </div>
-            </div>
-
-            <div class="contact-card">
-                <h2><i class="fas fa-comments"></i>Live Chat</h2>
+                <h2><i class="fas fa-location-dot card-icon"></i> Corporate Headquarters</h2>
                 <div class="contact-info">
-                    <p>Available during business hours</p>
-                    <a href="#" class="chat-button">Start Chat →</a>
-                </div>
-            </div>
-
-            <div class="contact-card">
-                <h2><i class="fas fa-share-alt"></i>Social Media</h2>
-                <div class="social-links">
-                    <a href="#" target="_blank"><i class="fab fa-linkedin"></i></a>
-                    <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
-                    <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
+                    <p><strong>Data Logics Inc.</strong></p>
+                    <p>AI Examination & Neural Telemetry Division<br>
+                    Technology Center, Suite 800</p>
                 </div>
             </div>
         </div>

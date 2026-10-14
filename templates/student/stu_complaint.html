@@ -1,217 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Complaints | OnlineEx</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Candidate Support Center | DL Procted Examination</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
-        :root {
-            --primary-blue: #1a365d;
-            --accent-blue: #4299e1;
-            --light-bg: #f8fafc;
-            --text-dark: #2d3748;
-            --text-light: #718096;
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light-bg);
-        }
-
-        /* Enhanced Sidebar */
+        body { margin: 0; font-family: var(--font-sans); background-color: var(--bg-canvas); color: var(--text-primary); }
         .sidebar {
-            width: 280px;
-            background-color: #ffffff;
-            height: 100vh;
-            position: fixed;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #e2e8f0;
-            padding-top: 30px;
+            width: 270px; background-color: #ffffff; height: 100vh; position: fixed;
+            display: flex; flex-direction: column; border-right: 1px solid var(--border); padding-top: 20px; z-index: 100;
         }
-
-        .navbar-brand {
-            font-size: 1.75rem;
-            font-weight: 700;
-            padding: 0 24px;
-            margin-bottom: 40px;
+        .brand-section { padding: 0 20px 18px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 20px; }
+        .profile { text-align: center; margin-bottom: 24px; padding: 0 20px; }
+        .profile img { width: 86px; height: 86px; border-radius: 50%; object-fit: cover; border: 3px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .profile h3 { margin: 12px 0 2px; font-size: 1.1rem; color: var(--text-primary); font-weight: 700; }
+        .role-badge { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); background: var(--accent-light); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--accent-border); }
+        .menu { padding: 0 14px; flex: 1; overflow-y: auto; }
+        .menu-item { padding: 11px 16px; font-size: 14px; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; border-radius: var(--radius); margin: 4px 0; font-weight: 500; transition: all 0.2s ease; }
+        .menu-item:hover { background-color: var(--bg-surface-hover); color: var(--accent); }
+        .menu-item.active { background-color: var(--accent-light); color: var(--accent); font-weight: 700; }
+        .menu-item .icon { font-size: 15px; margin-right: 12px; width: 22px; text-align: center; }
+        .content { margin-left: 270px; padding: 36px 44px; min-height: 100vh; }
+        .header-box { margin-bottom: 28px; }
+        .header-box h2 { margin: 0 0 4px; font-size: 1.6rem; font-weight: 800; }
+        .complaint-section {
+            background: white; border-radius: var(--radius-xl); border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm); padding: 28px; margin-top: 24px; max-width: 800px;
         }
-
-        .navbar-brand span:first-child {
-            color: var(--primary-blue);
-        }
-
-        .navbar-brand span:last-child {
-            color: var(--accent-blue);
-        }
-
-        .profile {
-            text-align: center;
-            margin-bottom: 32px;
-            padding: 0 20px;
-        }
-
-        .profile img {
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #e2e8f0;
-            transition: transform 0.2s ease;
-        }
-
-        .profile h3 {
-            margin: 16px 0 0;
-            font-size: 1.25rem;
-            color: var(--text-dark);
-            font-weight: 600;
-        }
-
-        .menu {
-            padding: 0 16px;
-        }
-
-        .menu-item {
-            padding: 14px 20px;
-            font-size: 15px;
-            color: var(--text-light);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            border-radius: 8px;
-            margin: 4px 0;
+        .complaint-section h3 { margin: 0 0 16px 0; font-size: 1.15rem; font-weight: 700; }
+        .complaint-form textarea {
+            width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius);
+            resize: vertical; min-height: 120px; font-family: inherit; font-size: 14px; box-sizing: border-box;
             transition: all 0.2s ease;
         }
-
-        .menu-item:hover,
-        .menu-item.active {
-            background-color: #ebf8ff;
-            color: var(--primary-blue);
-            font-weight: 600;
-        }
-
-        .menu-item .icon {
-            font-size: 1.1rem;
-            margin-right: 12px;
-            width: 24px;
-        }
-
-        /* Modern Content Area */
-        .content {
-            margin-left: 280px;
-            padding: 32px 40px;
-        }
-
-        .complaint-section {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            box-shadow: var(--shadow-sm);
-            padding: 24px;
-            margin-top: 24px;
-        }
-
-        .complaint-form textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            resize: vertical;
-            min-height: 120px;
-            font-size: 14px;
-            transition: border-color 0.2s ease;
-        }
-
-        .complaint-form textarea:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-        }
-
+        .complaint-form textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
         .complaint-form button {
-            background-color: var(--primary-blue);
-            color: white;
-            padding: 10px 24px;
-            border: none;
-            border-radius: 6px;
-            margin-top: 16px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+            background: var(--accent-gradient); color: white; padding: 11px 24px; border: 1px solid var(--accent);
+            border-radius: var(--radius); margin-top: 16px; cursor: pointer; font-weight: 700; font-size: 14px;
+            box-shadow: 0 4px 14px rgba(201, 28, 40, 0.3); transition: all 0.2s ease;
         }
-
-        .complaint-form button:hover {
-            background-color: var(--accent-blue);
-        }
-
-        /* Complaint List Styling */
-        .complaint-card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-
-        .complaint-meta {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            margin-bottom: 12px;
-        }
-
-        .complaint-text {
-            color: var(--text-dark);
-            line-height: 1.6;
-            margin-bottom: 16px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: break-word;
-        }
-
-.reply-badge {
-    background: #ebf8ff;
-    color: var(--primary-blue);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    width: 100%;
-    word-break: break-word;
-}
-
-        .status-indicator {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-resolved {
-            background: #d4edda;
-            color: #155724;
+        .complaint-form button:hover { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); transform: translateY(-1px); }
+        .complaint-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-xs); }
+        .complaint-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .complaint-text { color: var(--text-primary); font-size: 14.5px; line-height: 1.6; margin: 0 0 14px; }
+        .reply-badge {
+            background: var(--accent-light); color: var(--accent); padding: 10px 14px; border-radius: var(--radius);
+            font-size: 0.88rem; font-weight: 600; border: 1px solid var(--accent-border); display: flex; align-items: center; gap: 8px;
         }
     </style>
 </head>
-
 <body>
     <div class="sidebar">
-        <div class="navbar-brand">
-            <span></span><span></span>
+        <div class="brand-section">
+            <a href="{{ url_for('studash') }}" class="dl-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+                <div class="dl-brand-text">
+                    <span class="dl-brand-title">DL <span class="crimson">Procted</span></span>
+                    <span class="dl-brand-subtitle">Examination</span>
+                </div>
+            </a>
         </div>
         
         <div class="profile">
@@ -219,72 +71,83 @@
                 <img src="data:image/jpeg;base64,{{ profile_image }}" alt="Profile Picture">
             </a>
             <h3>{{ fullname }}</h3>
+            <span class="role-badge"><i class="fas fa-user-graduate me-1"></i> Candidate</span>
         </div>
 
         <div class="menu">
             <a href="{{ url_for('studash') }}" class="menu-item">
-                <span class="icon"><i class="fas fa-tachometer-alt"></i></span>Dashboard
+                <span class="icon"><i class="fas fa-th-large"></i></span>Dashboard
+            </a>
+            <a href="{{ url_for('stu_profile') }}" class="menu-item">
+                <span class="icon"><i class="fas fa-user"></i></span>Profile
+            </a>
+            <a href="{{ url_for('history') }}" class="menu-item">
+                <span class="icon"><i class="fas fa-clock-rotate-left"></i></span>Exam History
             </a>
             <a href="{{ url_for('stu_result') }}" class="menu-item">
-                <span class="icon"><i class="fas fa-chart-bar"></i></span>Results
+                <span class="icon"><i class="fas fa-chart-column"></i></span>Results
             </a>
             <a href="{{ url_for('change_password') }}" class="menu-item">
                 <span class="icon"><i class="fas fa-lock"></i></span>Password Change
             </a>
             <a href="{{ url_for('stu_complaint') }}" class="menu-item active">
-                <span class="icon"><i class="fas fa-comment-dots"></i></span>Support Center
+                <span class="icon"><i class="fas fa-circle-question"></i></span>Support Center
             </a>
-            <a href="{{ url_for('logout') }}" class="menu-item">
-                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>Logout
-                <span style="color: red; font-size: 12px; margin-left: 8px;">(Confirm before exiting)</span>
+            <a href="{{ url_for('logout') }}" class="menu-item" style="margin-top: 15px; color: var(--error);">
+                <span class="icon" style="color: var(--error);"><i class="fas fa-arrow-right-from-bracket"></i></span>Logout
             </a>
         </div>
     </div>
 
     <div class="content">
-        <h1>Support Center</h1>
+        <div class="header-box">
+            <h2>Candidate Support Center</h2>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 0.92rem;">Direct grievance dispatch and technical incident resolution desk</p>
+        </div>
         
         <div class="complaint-section">
-            <h2>Submit New Query</h2>
+            <h3><i class="fas fa-pen-to-square me-2 text-danger"></i> Submit Technical or Exam Inquiry</h3>
             <form class="complaint-form" action="/submit_complaint" method="POST">
                 <textarea 
                     name="complaint_text" 
-                    placeholder="Describe your issue in detail..."
+                    placeholder="Describe any hardware difficulty, proctoring anomaly, or question discrepancy..."
                     required
                 ></textarea>
                 <input type="hidden" name="user_id" value="{{ session.get('user_id') }}">
                 <button type="submit">
-                    <i class="fas fa-paper-plane"></i> Submit Query
+                    <i class="fas fa-paper-plane me-1"></i> Transmit Ticket to Administration
                 </button>
             </form>
         </div>
 
         <div class="complaint-section">
-            <h2>Previous Inquiries</h2>
+            <h3><i class="fas fa-list-check me-2 text-danger"></i> Prior Support Tickets</h3>
             
             {% if complaints %}
                 {% for complaint in complaints %}
                 <div class="complaint-card">
                     <div class="complaint-meta">
-                        Submitted on {{ complaint['submission_date'] }}
-                        <span class="status-indicator status-{{ complaint['status'].lower() }}">
-                            {{ complaint['status']|capitalize }}
-                        </span>
+                        <span><i class="fas fa-clock me-1"></i> Submitted {{ complaint['submission_date'] }}</span>
+                        {% if complaint['status'].lower() == 'resolved' %}
+                            <span class="dl-badge dl-badge-success"><i class="fas fa-check"></i> Resolved</span>
+                        {% else %}
+                            <span class="dl-badge dl-badge-warning"><i class="fas fa-hourglass-half"></i> Under Investigation</span>
+                        {% endif %}
                     </div>
                     <p class="complaint-text">{{ complaint['complaint_text'] }}</p>
                     
                     {% if complaint['reply_text'] %}
                         <div class="reply-badge">
-                            <i class="fas fa-comment-check"></i>
-                            Official Response: {{ complaint['reply_text'] }}
+                            <i class="fas fa-reply-all me-1"></i>
+                            <strong>Official Response:</strong> {{ complaint['reply_text'] }}
                         </div>
                     {% endif %}
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-inbox fa-2x"></i>
-                    <p>No support requests found</p>
+                <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                    <i class="fas fa-inbox mb-2" style="font-size: 2rem; display: block;"></i>
+                    <p>No prior support tickets submitted.</p>
                 </div>
             {% endif %}
         </div>

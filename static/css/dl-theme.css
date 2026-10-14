@@ -1,0 +1,579 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ==========================================================================
+   DL Procted Examination Design System
+   Inspired by Datalogics Enterprise Agentic AI Platform
+   Clean canvas, jet-black typography, corporate slate & crimson red accents
+   ========================================================================== */
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Colors */
+  --bg-base: #ffffff;
+  --bg-canvas: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-input: #ffffff;
+
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --border-highlight: #cbd5e1;
+  --border-focus: #c91c28;
+
+  /* Brand Crimson Accent */
+  --accent: #c91c28;
+  --accent-hover: #b91c1c;
+  --accent-active: #991b1b;
+  --accent-glow: rgba(201, 28, 40, 0.16);
+  --accent-light: rgba(201, 28, 40, 0.06);
+  --accent-border: rgba(201, 28, 40, 0.22);
+  --accent-gradient: linear-gradient(135deg, #c91c28 0%, #a81822 100%);
+
+  /* Typography */
+  --text-primary: #09090b;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Status Colors */
+  --success: #059669;
+  --success-bg: rgba(5, 150, 105, 0.08);
+  --success-border: rgba(5, 150, 105, 0.25);
+  --warning: #d97706;
+  --warning-bg: rgba(217, 119, 6, 0.08);
+  --warning-border: rgba(217, 119, 6, 0.25);
+  --error: #dc2626;
+  --error-bg: rgba(220, 38, 38, 0.08);
+  --error-border: rgba(220, 38, 38, 0.25);
+
+  /* Geometry & Shadows */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 9999px;
+
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 2px 4px -1px rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 6px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 12px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 24px 44px -8px rgba(15, 23, 42, 0.12);
+  --shadow-crimson: 0 8px 24px -4px rgba(201, 28, 40, 0.28);
+}
+
+/* ==========================================================================
+   Base Reset
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-canvas);
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+a:hover {
+  color: var(--accent-hover);
+}
+
+/* ==========================================================================
+   Brand Header & Logo Elements
+   ========================================================================== */
+.dl-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none !important;
+}
+
+.dl-brand-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.08));
+  transition: transform 0.2s ease;
+}
+.dl-brand:hover .dl-brand-logo {
+  transform: scale(1.05);
+}
+
+.dl-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.dl-brand-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dl-brand-title .crimson {
+  color: var(--accent);
+}
+
+.dl-brand-subtitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Ambient glow accents */
+.dl-glow-top {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  width: 500px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(201, 28, 40, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ==========================================================================
+   Navbar
+   ========================================================================== */
+.dl-navbar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.85rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.dl-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dl-nav-link {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+.dl-nav-link:hover, .dl-nav-link.active {
+  color: var(--accent);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.dl-btn,
+.btn-primary,
+.btn-join.active,
+.btn-create-test {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--accent-gradient) !important;
+  color: #ffffff !important;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0.62rem 1.35rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent) !important;
+  box-shadow: 0 2px 6px -1px rgba(201, 28, 40, 0.25);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none !important;
+}
+
+.dl-btn:hover,
+.btn-primary:hover,
+.btn-create-test:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
+  border-color: #991b1b !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-crimson);
+  transform: translateY(-1px);
+}
+
+.dl-btn-secondary,
+.btn-secondary {
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  font-weight: 600;
+  padding: 0.62rem 1.35rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-xs);
+  transition: all 0.2s ease;
+}
+.dl-btn-secondary:hover,
+.btn-secondary:hover {
+  background: var(--bg-surface-hover) !important;
+  border-color: var(--border-highlight) !important;
+  color: var(--text-primary) !important;
+  transform: translateY(-1px);
+}
+
+.dl-btn-outline {
+  background: transparent !important;
+  color: var(--accent) !important;
+  border: 1px solid var(--accent-border) !important;
+}
+.dl-btn-outline:hover {
+  background: var(--accent-light) !important;
+  border-color: var(--accent) !important;
+}
+
+.dl-btn-danger,
+.btn-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #dc2626 !important;
+  border-radius: var(--radius);
+  padding: 0.62rem 1.35rem;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Inputs & Forms
+   ========================================================================== */
+.dl-input,
+.form-control,
+.form-select,
+.panel input[type=text],
+.panel input[type=email],
+.panel input[type=tel],
+.panel input[type=password],
+.panel textarea,
+.panel select,
+input[type=text],
+input[type=email],
+input[type=password],
+input[type=tel],
+textarea,
+select {
+  font-family: var(--font-sans);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.95rem;
+  font-size: 0.92rem;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.dl-input:focus,
+.form-control:focus,
+.form-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background-color: #ffffff;
+}
+
+/* ==========================================================================
+   Cards & Panels
+   ========================================================================== */
+.dl-card,
+.card,
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+}
+
+.dl-card-hover:hover,
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-highlight);
+}
+
+.dl-card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dl-card-body {
+  padding: 1.5rem;
+}
+
+/* ==========================================================================
+   Sidebar (Student, Teacher & Admin)
+   ========================================================================== */
+.sidebar,
+.dl-sidebar {
+  width: 270px;
+  background: #ffffff;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  padding-top: 24px;
+  z-index: 100;
+  box-shadow: 1px 0 4px rgba(0, 0, 0, 0.02);
+}
+
+.sidebar .brand-area {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 20px;
+}
+
+.sidebar .profile {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 0 20px;
+}
+.sidebar .profile img,
+.sidebar .profile .avatar {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+.sidebar .profile .avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent-gradient);
+}
+.sidebar .profile h3 {
+  margin: 12px 0 0;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.sidebar .menu {
+  padding: 0 14px;
+  flex: 1;
+  overflow-y: auto;
+}
+.sidebar .menu-item {
+  padding: 11px 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius);
+  margin: 4px 0;
+  font-weight: 500;
+  transition: all 0.18s ease;
+}
+.sidebar .menu-item .icon {
+  margin-right: 12px;
+  width: 20px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--text-muted);
+  transition: color 0.18s ease;
+}
+.sidebar .menu-item:hover {
+  background: var(--bg-surface-hover);
+  color: var(--accent);
+}
+.sidebar .menu-item:hover .icon {
+  color: var(--accent);
+}
+.sidebar .menu-item.active {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 700;
+}
+.sidebar .menu-item.active .icon {
+  color: var(--accent);
+}
+
+.content {
+  margin-left: 270px;
+  padding: 32px 40px;
+  min-height: 100vh;
+  background: var(--bg-canvas);
+}
+
+/* ==========================================================================
+   Badges, Pills & Status
+   ========================================================================== */
+.dl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.dl-badge-crimson {
+  background: var(--accent-light);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+.dl-badge-success {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+}
+
+.dl-badge-warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+  border: 1px solid var(--warning-border);
+}
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+.dl-table,
+table.t {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+.dl-table th,
+table.t th {
+  background: #f8fafc;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.dl-table td,
+table.t td {
+  padding: 13px 16px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.dl-table tr:last-child td,
+table.t tr:last-child td {
+  border-bottom: none;
+}
+.dl-table tr:hover td,
+table.t tr:hover td {
+  background: #fafbfe;
+}
+
+/* ==========================================================================
+   Flashes & Alerts
+   ========================================================================== */
+.flash,
+.alert {
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.flash.success,
+.alert-success {
+  background: var(--success-bg);
+  color: #065f46;
+  border-color: var(--success-border);
+}
+.flash.error,
+.flash.danger,
+.alert-danger {
+  background: var(--error-bg);
+  color: #991b1b;
+  border-color: var(--error-border);
+}
+
+/* ==========================================================================
+   Authentication & Hero Splashed Layouts
+   ========================================================================== */
+.dl-auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-canvas);
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 1rem;
+}
+
+.dl-auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2.25rem 2rem;
+  box-shadow: var(--shadow-xl);
+  position: relative;
+  z-index: 10;
+}

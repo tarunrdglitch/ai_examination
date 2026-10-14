@@ -1,163 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Educator Registration | DL Procted Examination</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: #f5f9ff;
+            font-family: var(--font-sans);
+            background-color: var(--bg-canvas);
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
+            justify-content: center;
+            padding: 30px 20px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .signup-container {
-            background-color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            padding: 30px;
-            width: 400px;
+        .auth-top-nav {
+            position: absolute;
+            top: 24px;
+            left: 28px;
+            z-index: 20;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 36px 32px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-header {
             text-align: center;
+            margin-bottom: 24px;
         }
 
-        .signup-container h1 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #2b2b2b;
-            margin-bottom: 20px;
+        .auth-header img {
+            width: 46px;
+            height: 46px;
+            object-fit: contain;
+            margin-bottom: 10px;
         }
 
-        .signup-container form {
+        .auth-header h1 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            margin: 0 0 4px;
+            color: var(--text-primary);
+        }
+
+        .auth-header p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .role-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid var(--accent-border);
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 8px;
+        }
+
+        .form-row {
             display: flex;
-            flex-direction: column;
+            gap: 12px;
         }
-
-        .signup-container input {
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .signup-container input:focus {
-            outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
-        }
-
-        .signup-container button {
-            padding: 10px 15px;
-            background-color: #4a90e2;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .signup-container button:hover {
-            background-color: #357abd;
-        }
-
-        .signup-container .login-link {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        .signup-container .login-link a {
-            color: #4a90e2;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .signup-container .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        .signup-container label {
-            font-size: 14px;
-            color: #2b2b2b;
+        .form-group {
+            margin-bottom: 14px;
+            flex: 1;
             text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
             margin-bottom: 5px;
         }
 
-        .signup-container input[type="file"] {
-            padding: 5px;
-        }
-        .navbar {
-            position: absolute;
-            top: 30px;
-            left: 90px;
-        }
-
-        .navbar-brand {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-left: -1cm; /* Move the brand 1cm to the left */
+        .form-group input {
+            width: 100%;
+            padding: 9.5px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            background: #ffffff;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
-        .navbar-brand span:first-child {
-            color: #0c447b; /* Dark blue for "Online" */
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
-        .navbar-brand span:last-child {
-            color: #4a90e2; /* Light blue for "Ex" */
+
+        .file-upload-box {
+            border: 1.5px dashed var(--border-highlight);
+            background: var(--bg-surface-hover);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .file-upload-box input[type="file"] {
+            border: none;
+            background: transparent;
+            padding: 4px 0;
+            font-size: 0.82rem;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 11px;
+            background: var(--accent-gradient);
+            color: #ffffff;
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(201, 28, 40, 0.3);
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-crimson);
+        }
+
+        .auth-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-footer a {
+            color: var(--accent);
+            font-weight: 600;
         }
     </style>
 </head>
-
 <body>
-    <div class="navbar">
-        <div class="navbar-brand">
-            <span></span><span></span>
-        </div>
+    <div class="auth-top-nav">
+        <a href="/" class="dl-brand">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+            <div class="dl-brand-text">
+                <span class="dl-brand-title">DL <span class="crimson">Procted</span></span>
+                <span class="dl-brand-subtitle">Examination</span>
+            </div>
+        </a>
     </div>
-    <div class="signup-container">
-        <h1>Create Account</h1>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination">
+            <h1>Educator Account Setup</h1>
+            <p>Deploy examinations and analyze candidate proctoring data</p>
+            <div><span class="role-pill"><i class="fas fa-chalkboard-user"></i> Instructor Faculty</span></div>
+        </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-<form method="POST" action="{{ url_for('teacher_signup') }}" enctype="multipart/form-data">
-            <input type="text" name="fullname" placeholder="Full Name" required>
-            <input type="email" name="email" placeholder="Email Address" required 
-                   pattern="[a-zA-Z0-9._%+-]+@gmail\.com$" 
-                   title="Please enter a valid @gmail.com address">
-            <input type="text" name="username" placeholder="Username" required 
-                   minlength="3" title="Username must be at least 3 characters">
-            <input type="tel" id="contact" name="contact" placeholder="Contact Number" required pattern="[0-9]{10}" title="Enter a valid 10-digit contact number.">
-            <input type="password" name="password" placeholder="Password" required 
-                   minlength="5" title="Password must be at least 5 characters">
-            <input type="password" name="confirm_password" placeholder="Confirm Password" required
-                   minlength="5" title="Password must be at least 5 characters">
-            <label>Profile Picture:</label>
-            <input type="file" name="profile_pic" accept="image/*" required>
-            <button type="submit">Sign Up</button>
+        <form method="POST" action="{{ url_for('teacher_signup') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="fullname">Full Instructor Name</label>
+                <input type="text" id="fullname" name="fullname" placeholder="Prof. / Dr. / Instructor Name" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Faculty ID" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="contact">Contact Phone</label>
+                    <input type="tel" id="contact" name="contact" placeholder="10-digit number" required pattern="[0-9]{10}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Institutional / Work Email</label>
+                <input type="email" id="email" name="email" placeholder="faculty@institution.edu" required pattern="[a-zA-Z0-9._%+-]+@gmail\.com$" title="Please enter a valid @gmail.com address">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="At least 5 chars" required minlength="5">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat password" required minlength="5">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="profile_pic">Faculty Avatar Image</label>
+                <div class="file-upload-box">
+                    <input type="file" id="profile_pic" name="profile_pic" accept="image/*" required>
+                </div>
+            </div>
+
+            <button type="submit" class="auth-btn">
+                <i class="fas fa-check-circle me-1"></i> Register Faculty Account
+            </button>
         </form>
-        <div class="login-link">
+
+        <div class="auth-footer">
             Already have an account? <a href="/teacher/login">Log In</a>
         </div>
     </div>
+
     <script>
-        // Auto-hide flash messages after 3 seconds
         setTimeout(function() {
-            let alerts = document.querySelectorAll(".alert");
-            alerts.forEach(alert => alert.style.display = "none");
-        }, 3000);
+            let alerts = document.querySelectorAll(".flash");
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 3500);
     </script>
 </body>
-
 </html>

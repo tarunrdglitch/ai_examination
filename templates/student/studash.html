@@ -1,109 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Candidate Dashboard | DL Procted Examination</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dl-theme.css') }}">
     <style>
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light-bg);
+            font-family: var(--font-sans);
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
         }
 
-        :root {
-    --primary-blue: #1a365d;
-    --accent-blue: #4299e1;
-    --light-bg: #f8fafc;
-    --text-dark: #2d3748;
-    --text-light: #718096;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
+        .sidebar {
+            width: 270px;
+            background-color: #ffffff;
+            height: 100vh;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            padding-top: 20px;
+            z-index: 100;
+        }
 
-.sidebar {
-    width: 280px;
-    background-color: #ffffff;
-    height: 100vh;
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid #e2e8f0;
-    padding-top: 30px;
-}
+        .brand-section {
+            padding: 0 20px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 20px;
+        }
 
-.navbar-brand {
-    font-size: 1.75rem;
-    font-weight: 700;
-    padding: 0 24px;
-    margin-bottom: 40px;
-}
+        .profile {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 0 20px;
+        }
 
-.navbar-brand span:first-child {
-    color: var(--primary-blue);
-}
+        .profile img {
+            width: 86px;
+            height: 86px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease;
+        }
 
-.navbar-brand span:last-child {
-    color: var(--accent-blue);
-}
+        .profile img:hover {
+            transform: scale(1.04);
+        }
 
-.profile {
-    text-align: center;
-    margin-bottom: 32px;
-    padding: 0 20px;
-}
+        .profile h3 {
+            margin: 12px 0 2px;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
 
-.profile img {
-    width: 96px;
-    height: 96px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #e2e8f0;
-    transition: transform 0.2s ease;
-}
+        .role-badge {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--accent);
+            background: var(--accent-light);
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--accent-border);
+        }
 
-.profile h3 {
-    margin: 16px 0 0;
-    font-size: 1.25rem;
-    color: var(--text-dark);
-    font-weight: 600;
-}
+        .menu {
+            padding: 0 14px;
+            flex: 1;
+            overflow-y: auto;
+        }
 
-.menu {
-    padding: 0 16px;
-}
+        .menu-item {
+            padding: 11px 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            border-radius: var(--radius);
+            margin: 4px 0;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
 
-.menu-item {
-    padding: 14px 20px;
-    font-size: 15px;
-    color: var(--text-light);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    border-radius: 8px;
-    margin: 4px 0;
-    transition: all 0.2s ease;
-}
+        .menu-item:hover {
+            background-color: var(--bg-surface-hover);
+            color: var(--accent);
+        }
 
-.menu-item:hover,
-.menu-item.active {
-    background-color: #ebf8ff;
-    color: var(--primary-blue);
-    font-weight: 600;
-}
+        .menu-item.active {
+            background-color: var(--accent-light);
+            color: var(--accent);
+            font-weight: 700;
+        }
 
-.menu-item .icon {
-    font-size: 1.1rem;
-    margin-right: 12px;
-    width: 24px;
-}
+        .menu-item .icon {
+            font-size: 15px;
+            margin-right: 12px;
+            width: 22px;
+            text-align: center;
+        }
 
-.content {
-    margin-left: 280px;
-    padding: 32px 40px;
-}
+        .content {
+            margin-left: 270px;
+            padding: 36px 44px;
+            min-height: 100vh;
+        }
+
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -113,218 +127,295 @@
 
         .dashboard-header h2 {
             margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-dark);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        /* Hero Status Banner */
+        .status-banner {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px 28px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-banner-info h3 {
+            margin: 0 0 6px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .status-banner-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
         }
 
         .exam-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 24px;
         }
 
         .exam-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--border-light);
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 26px;
+            border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
-            transition: all 0.2s ease;
+            transition: all 0.22s ease;
             cursor: pointer;
-            width: 7cm;
+            position: relative;
         }
 
         .exam-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-highlight);
         }
 
         .exam-icon {
-            font-size: 28px;
-            color: var(--primary-blue);
-            margin-bottom: 16px;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--accent-light);
+            border: 1px solid var(--accent-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 22px;
+            margin-bottom: 18px;
         }
 
         .exam-card h3 {
             margin: 0 0 8px;
-            font-size: 1.125rem;
-            color: var(--text-dark);
-            font-weight: 600;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         .exam-meta {
-            font-size: 14px;
-            color: var(--text-medium);
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 18px;
         }
 
+        .exam-card-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Popup Containers */
         .popup-container {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 32px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            width: 400px;
+            background-color: #ffffff;
+            padding: 34px;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+            width: 90%;
+            max-width: 440px;
+            border: 1px solid var(--border);
+            z-index: 1050;
             text-align: center;
         }
 
+        #rules-popup {
+            max-width: 520px;
+        }
+
         .popup-container h3 {
-            margin: 0 0 24px;
-            font-size: 1.25rem;
-            color: var(--text-dark);
+            margin: 0 0 16px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-primary);
         }
 
         .exam-input {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             margin-bottom: 20px;
-            font-size: 14px;
-            transition: border-color 0.2s ease;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
         .exam-input:focus {
             outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        .join-button {
+        .join-button, .agree-button {
             width: 100%;
             padding: 12px;
-            color: white;
-            background-color: var(--primary-blue);
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
+            color: #ffffff;
+            background: var(--accent-gradient);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            box-shadow: 0 4px 14px rgba(201, 28, 40, 0.3);
+            transition: all 0.2s ease;
         }
 
-        .join-button:hover {
-            background-color: var(--accent-blue);
-
-        }
-
-        #rules-popup {
-            width: 500px;
+        .join-button:hover, .agree-button:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-1px);
         }
 
         .rules-content {
             text-align: left;
             margin-bottom: 24px;
-            color: var(--text-light);
-            font-size: 14px;
+            color: var(--text-secondary);
+            font-size: 0.92rem;
             line-height: 1.6;
         }
-
         .rules-content ul {
-            padding-left: 24px;
-            margin: 16px 0;
+            padding-left: 20px;
+            margin: 14px 0;
         }
-
         .rules-content li {
-            margin-bottom: 12px;
-        }
-
-        .agree-button {
-            width: 100%;
-            padding: 12px;
-            color: white;
-            background-color: var(--primary-blue);
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .agree-button:hover {
-            background-color: var(--accent-blue);
+            margin-bottom: 10px;
         }
     </style>
 </head>
 
 <body>
     <div class="sidebar">
-        <div class="navbar-brand">
-            <span></span><span></span>
+        <div class="brand-section">
+            <a href="{{ url_for('studash') }}" class="dl-brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="DL Procted Examination" class="dl-brand-logo">
+                <div class="dl-brand-text">
+                    <span class="dl-brand-title">DL <span class="crimson">Procted</span></span>
+                    <span class="dl-brand-subtitle">Examination</span>
+                </div>
+            </a>
         </div>
         
         <div class="profile">
-            <a href="{{ url_for('edit_profile') }}">
-                <img src="data:image/jpeg;base64,{{ profile_image }}" alt="Profile">
+            <a href="{{ url_for('edit_profile') }}" title="Update verification photo">
+                {% if profile_image %}
+                    <img src="data:image/jpeg;base64,{{ profile_image }}" alt="Profile">
+                {% else %}
+                    <div style="width:86px; height:86px; border-radius:50%; background:var(--accent-gradient); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:2rem; font-weight:700;">
+                        {{ (fullname or 'C')[:1]|upper }}
+                    </div>
+                {% endif %}
             </a>
             <h3>{{ fullname }}</h3>
+            <span class="role-badge"><i class="fas fa-user-graduate me-1"></i> Candidate</span>
         </div>
     
         <div class="menu">
             <a href="{{ url_for('studash') }}" class="menu-item active">
-                <span class="icon"><i class="fas fa-tachometer-alt"></i></span>Dashboard
+                <span class="icon"><i class="fas fa-th-large"></i></span>Dashboard
+            </a>
+            <a href="{{ url_for('stu_profile') }}" class="menu-item">
+                <span class="icon"><i class="fas fa-user"></i></span>Candidate Profile
+            </a>
+            <a href="{{ url_for('history') }}" class="menu-item">
+                <span class="icon"><i class="fas fa-clock-rotate-left"></i></span>Exam History
             </a>
             <a href="{{ url_for('stu_result') }}" class="menu-item">
-                <span class="icon"><i class="fas fa-chart-bar"></i></span>Results
+                <span class="icon"><i class="fas fa-chart-column"></i></span>Results
             </a>
             <a href="{{ url_for('change_password') }}" class="menu-item">
                 <span class="icon"><i class="fas fa-lock"></i></span>Password Change
             </a>
             <a href="{{ url_for('stu_complaint') }}" class="menu-item">
-                <span class="icon"><i class="fas fa-comment-dots"></i></span>Support Center
+                <span class="icon"><i class="fas fa-circle-question"></i></span>Support Center
             </a>
-            <a href="{{ url_for('logout') }}" class="menu-item">
-                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>Logout
-                <span style="color: red; font-size: 12px; margin-left: 8px;">(Confirm before exiting)</span>
+            <a href="{{ url_for('logout') }}" class="menu-item" style="margin-top: 15px; color: var(--error);">
+                <span class="icon" style="color: var(--error);"><i class="fas fa-arrow-right-from-bracket"></i></span>Logout
             </a>
-            
         </div>
     </div>
 
     <div class="content">
         <div class="dashboard-header">
-            <h2>Active Examinations</h2>
+            <div>
+                <h2>Candidate Workspace</h2>
+                <span style="font-size: 0.9rem; color: var(--text-secondary);">DL Procted Examination Real-Time Monitoring Portal</span>
+            </div>
+            <div class="dl-badge dl-badge-crimson">
+                <i class="fas fa-circle" style="font-size: 7px; color: var(--accent);"></i> AI Engine Active
+            </div>
         </div>
+
+        <div class="status-banner">
+            <div class="status-banner-info">
+                <h3>Welcome back, {{ fullname }}!</h3>
+                <p>Have an examination link or access token? Click below to launch session identity check and enter the test room.</p>
+            </div>
+            <button class="dl-btn" onclick="document.getElementById('popup-container').style.display='block';">
+                <i class="fas fa-paper-plane me-1"></i> Enter Exam Code
+            </button>
+        </div>
+
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 18px;">Active Session Access</h3>
         <div class="exam-grid">
             <div class="exam-card" id="exam-card">
                 <div class="exam-icon">
-                    <i class="fas fa-clipboard-list"></i>
+                    <i class="fas fa-laptop-code"></i>
                 </div>
-                <h3>Exam Link</h3>
-                <div class="exam-meta"></div>
+                <h3>Enter Secure Exam</h3>
+                <div class="exam-meta">
+                    Launch AI webcam calibration, verify audio baseline, and begin your scheduled examination session.
+                </div>
+                <div class="exam-card-cta">
+                    Enter Session <i class="fas fa-arrow-right"></i>
+                </div>
             </div>
         </div>
 
         <!-- Add rules popup -->
         <div class="popup-container" id="rules-popup">
+            <div class="d-flex justify-content-center mb-2">
+                <span class="dl-badge dl-badge-crimson"><i class="fas fa-shield"></i> Mandatory Rules</span>
+            </div>
             <h3>Exam Rules and Guidelines</h3>
             <div class="rules-content">
-                <p>Before proceeding to the exam, please read and agree to follow these rules:</p>
+                <p>Please review and confirm compliance before entering the secure testing environment:</p>
                 <ul>
-                    <li>You must have a functioning webcam and microphone enabled throughout the exam</li>
-                    <li>Do not switch tabs or open other applications during the exam</li>
-                    <li>Any attempt to copy or use unauthorized materials will result in disqualification</li>
-                    <li>Ensure you have a stable internet connection before starting</li>
-                    <li>The exam must be completed in one session - you cannot pause and resume later</li>
-                    <li>All answers are final once submitted</li>
+                    <li>Webcam and microphone must remain continuously active and unobstructed.</li>
+                    <li>Tab switching, dual screens, and window unfocusing trigger automated violation flags.</li>
+                    <li>Unauthorized aids, cell phones, and second persons result in immediate test invalidation.</li>
+                    <li>Ensure constant internet connectivity; answers are auto-saved in real time.</li>
                 </ul>
-                <p>Violation of any rules may result in immediate termination of your exam.</p>
             </div>
-            <button class="agree-button" id="agree-btn">I Agree - Proceed to Exam</button>
+            <button class="agree-button" id="agree-btn"><i class="fas fa-check-circle me-1"></i> I Agree - Enter Exam</button>
         </div>
 
         <div class="popup-container" id="popup-container">
-            <h3>Enter Exam Session</h3>
-            <input type="text" id="exam-link" class="exam-input" placeholder="Paste exam link here">
-            <button class="join-button" id="join-btn">Join Examination</button>
+            <div class="d-flex justify-content-center mb-2">
+                <span class="dl-badge dl-badge-crimson"><i class="fas fa-key"></i> Session Token</span>
+            </div>
+            <h3>Enter Exam Token</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">Paste your exam code or session invitation link provided by your educator.</p>
+            <input type="text" id="exam-link" class="exam-input" placeholder="e.g. 8f4a-9b2c or session token">
+            <button class="join-button" id="join-btn"><i class="fas fa-door-open me-1"></i> Verify & Join</button>
         </div>
     </div>
 
     <script>
-        // Keep existing JavaScript functionality
         const examCard = document.getElementById('exam-card');
         const rulesPopup = document.getElementById('rules-popup');
         const popupContainer = document.getElementById('popup-container');
@@ -333,82 +424,67 @@
         const examLinkInput = document.getElementById('exam-link');
 
         examCard.addEventListener('click', () => {
-            // Show popup to enter exam link first
             popupContainer.style.display = 'block';
         });
 
-        // Then update the join button functionality
-joinButton.addEventListener('click', () => {
-    const examLink = examLinkInput.value.trim();
-    if (examLink) {
-        // Show loading state
-        joinButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
-        joinButton.disabled = true;
-        
-        // Verify the exam link before proceeding
-        fetch('/verify_exam_link', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ exam_link: examLink })
-        })
-        .then(response => response.json())
-        .then(data => {
-            joinButton.innerHTML = 'Join Examination';
-            joinButton.disabled = false;
-            
-            if (data.valid) {
-                // Close the link input popup
-                popupContainer.style.display = 'none';
+        joinButton.addEventListener('click', () => {
+            const examLink = examLinkInput.value.trim();
+            if (examLink) {
+                joinButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Verifying...';
+                joinButton.disabled = true;
                 
-                // Update the rules popup title with exam name if available
-                if (data.exam_title) {
-                    document.querySelector('#rules-popup h3').textContent = data.exam_title + ' - Rules and Guidelines';
-                }
-                
-                // Now show the rules popup
-                rulesPopup.style.display = 'block';
+                fetch('/verify_exam_link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ exam_link: examLink })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    joinButton.innerHTML = '<i class="fas fa-door-open me-1"></i> Verify & Join';
+                    joinButton.disabled = false;
+                    
+                    if (data.valid) {
+                        popupContainer.style.display = 'none';
+                        if (data.exam_title) {
+                            document.querySelector('#rules-popup h3').textContent = data.exam_title + ' - Examination Rules';
+                        }
+                        rulesPopup.style.display = 'block';
+                    } else {
+                        alert(data.message || 'Invalid examination link or session has ended.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    joinButton.innerHTML = '<i class="fas fa-door-open me-1"></i> Verify & Join';
+                    joinButton.disabled = false;
+                    alert('Unable to contact verification service. Please try again.');
+                });
             } else {
-                // Show error if exam link is invalid or not active
-                alert(data.message || 'Invalid exam link or the exam is not currently active.');
+                alert('Please enter a valid examination token.');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            joinButton.innerHTML = 'Join Examination';
-            joinButton.disabled = false;
-            alert('An error occurred. Please try again.');
         });
-    } else {
-        alert('Please enter a valid exam link.');
-    }
-});
 
-// Update the agree button to redirect to the exam with the link as query parameter
-agreeButton.addEventListener('click', () => {
-    const examLink = examLinkInput.value.trim();
-    if (examLink) {
-        window.location.href = `/exam?exam_link=${encodeURIComponent(examLink)}`;
-    }
-});
+        agreeButton.addEventListener('click', () => {
+            const examLink = examLinkInput.value.trim();
+            if (examLink) {
+                window.location.href = `/exam?exam_link=${encodeURIComponent(examLink)}`;
+            }
+        });
 
-        // Modified click outside handler
         document.addEventListener('click', (event) => {
             if (!event.target.closest('.popup-container') && 
-                !event.target.closest('#exam-card')) {
+                !event.target.closest('#exam-card') &&
+                !event.target.closest('button[onclick*="popup-container"]')) {
                 rulesPopup.style.display = 'none';
                 popupContainer.style.display = 'none';
             }
         });
 
-        
-        
-            document.querySelectorAll('.menu-item').forEach(item => {
+        document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 if(this.href.includes('logout')) {
                     e.preventDefault();
-                    if(confirm('Are you sure you want to logout?')) {
+                    if(confirm('Are you sure you want to end your candidate session and logout?')) {
                         window.location.href = this.href;
                     }
                 }
